@@ -10,7 +10,7 @@ export interface ITimeControlProps{
     format:"h:mm a"|"k:mm";
     use12Hours:boolean;
 
-    onChange: (hourvalue:number|undefined,minutevalue:number|undefined) => void;
+    //onChange: (hourvalue:number|undefined,minutevalue:number|undefined) => void;
 }
 
 export default class TimePickerTextBox extends React.Component<ITimeControlProps>{
@@ -20,7 +20,15 @@ export default class TimePickerTextBox extends React.Component<ITimeControlProps
 
     render(){
         return(
-            <div></div>
+            <div>
+                <TimePicker 
+                    showSecond = {false}
+                    className = "time"
+                    format = {this.props.format}
+                    use12Hours = {this.props.use12Hours}
+                    inputReadOnly
+                     />
+            </div>
         )
     }
 }

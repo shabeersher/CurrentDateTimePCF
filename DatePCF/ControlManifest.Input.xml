@@ -21,8 +21,9 @@
     -->
     <resources>
       <code path="index.ts" order="1"/>
-      <!-- UNCOMMENT TO ADD MORE RESOURCES
-      <css path="css/DatePCF.css" order="1" />
+
+      <css path="DateTimeControl/css/TimePicker.css" order="1" />
+            <!-- UNCOMMENT TO ADD MORE RESOURCES
       <resx path="strings/DatePCF.1033.resx" version="1.0.0" />
       -->
     </resources>

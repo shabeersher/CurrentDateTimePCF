@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
-
+//import TimePicker, { ITimeControlProps } from './TimeBox';
+import TimePicker from './TimeBox_example';
 export interface IDate{
   currentDate: Date | undefined;
 }
@@ -74,7 +75,15 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         super(props);
         this.state = {
             isCalloutVisible: false,
-            currentDate : props.currentDate
+            currentDate : props.currentDate/*,
+            hourvalue:12,
+            minutevalue: 20,
+            readonly:false,
+            masked:false,
+            format:"h:mm a",
+            use12Hours:
+            */
+
         };
     }
     private _menuButtonElement = React.createRef<HTMLDivElement>();
@@ -104,7 +113,13 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
 
     private onDateChanged = () =>{
       const date: IDate={
-        currentDate:this.state.currentDate
+        currentDate:this.state.currentDate/*,
+        hourvalue:12,
+        minutevalue: 20,
+        readonly:false,
+        masked:false,
+        format:"h:mm a",
+        use12Hours:true */
       };
       this.props.onDateChanged(date);
     }
@@ -144,6 +159,20 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             value={this.state.currentDate }
                         />
                     </Stack>
+                    <Stack tokens={{childrenGap:10, padding:10}}>
+                            <TimePicker 
+                            hourvalue = {8}
+                            minutevalue= {30}
+                            readonly= {false}
+                            masked = {false}
+                            format = {"h:mm a"}
+                            use12Hours = {false}
+                            onChange = {() =>{
+                              console.log("OnChange clicked")
+                            }}
+                            />
+                    </Stack>
+                    
                     <Stack tokens={{childrenGap:10, padding:10}}>
                         <PrimaryButton 
                                 text={"Current Date"}

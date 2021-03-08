@@ -13,6 +13,7 @@
     "@types/powerapps-component-framework": "^1.2.0",
     "@types/react-dom": "^16.9.11",
     "moment": "^2.29.1",
+    "npm-watch": "^0.7.0",
     "office-ui-fabric-react": "^7.162.1",
     "rc-time-picker": "^3.7.3",
     "react": "^16.8.4"

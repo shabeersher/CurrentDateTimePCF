@@ -48,7 +48,13 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		const currentDate = new Date(context.parameters.CurrentDate.raw ?? "");
 
 		const compositeDateControlProps: IDateControlProps = {
-			currentDate: context.parameters.CurrentDate.raw ?? undefined,
+			currentDate: context.parameters.CurrentDate.raw ?? undefined/*,
+			hourvalue: 8,
+			minutevalue: 30,
+			masked: true,
+			format: "h:mm a",
+			use12Hours:true,
+			readonly: true,*/,
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				this.notifyOutputChanged();
