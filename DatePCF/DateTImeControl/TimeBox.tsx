@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { useState, useEffect } from "react";
 import { Moment } from 'moment';
@@ -6,10 +5,6 @@ import TimePicker from 'rc-time-picker';
 import {FontIcon, Stack, TextField, mergeStyles} from '@fluentui/react';
 
 import moment = require('moment');
-
-
-
-
 
 export interface ITimeProps {
     hourvalue: number|undefined;

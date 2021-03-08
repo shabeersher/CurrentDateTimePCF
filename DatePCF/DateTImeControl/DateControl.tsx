@@ -2,14 +2,17 @@ import * as React from 'react';
 import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
 import TimePicker, { ITimeProps } from './TimeBox';
 
+
 export interface IDate extends ITimeProps{
-  currentDate: Date;
+  currentDate: Date | undefined;
   isDateOnly: boolean;
   hourValue: number | undefined;
+  //onChange:(hourValue:number, minuteValue: number) => void;
 }
 
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
+
 }
 
 interface IDateControlState extends IDate{
@@ -160,9 +163,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       console.log("GetCurrentDate Min: "+minute);
       console.log("System Date:"+systemDate)
       var timezone = systemDate.getTimezoneOffset();
-      console.log("TimeZone: "+timezone);
-      systemDate.setHours(systemDate.getHours() + timezone);
-      console.log("SystemDate: "+ systemDate);
       if(isDateAndTime != true) //We are dealing with Date only
       {
         console.log("Date only");
@@ -194,27 +194,26 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             allowTextInput={true}
                             ariaLabel={desc}
                             firstDayOfWeek={firstDayOfWeek}
-                            /*
                             onSelectDate = {(selected => {
                               console.log("selected Date:"+selected)
                               this.setState({
-                                currentDate: selected                               
+                                currentDate: selected ?? undefined                                
                               },this.onDateChanged)
                             })}
-                            */
-                            value={this.state.currentDate}
+                            value={this.state.currentDate }
                         />
                     </Stack>
                     {
                       this.state.isDateOnly === false ?                     
                           <Stack tokens={{childrenGap:10, padding:10}}>
                           <TimePicker 
-                          hourvalue = {this.state.hourvalue}
+                          hourvalue = {this.state.hourValue}
                           minutevalue= {this.state.minutevalue}
                           readonly= {false}
                           masked = {false}
                           format = {this.props.format}
                           use12Hours = {this.props.use12Hours}
+                          
                           />
                         </Stack> : null
                     }

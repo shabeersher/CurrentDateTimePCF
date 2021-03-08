@@ -81,44 +81,11 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		this._props.masked = isMasked;
 		this._props.use12Hours = display === "12 hrs";
 		this._props.format = display === "12 hrs" ? "h:mm a" : "k:mm";
-		
-		let currDate = context.parameters.CurrentDate.raw;
-		if(currentDate != null || currentDate != undefined)
-		{
-			//var something = Date.parse(currDate);
-			/*
-			var utcDate = Date.UTC(currDate?.getUTCFullYear(), currDate?.getUTCMonth(), currDate?.getUTCDate(),
-			currDate?.getUTCHours(), currDate?.getUTCMinutes(), currDate?.getUTCSeconds());
-			*/
-		}
-		console.log("Context Date: "+ context.parameters.CurrentDate.formatted);
-		console.log("Curr Date String: "+ currDate);
-		/*
-		var utcDate1 = new Date(Date.UTC(2008, 1,2,3,4,5));
-		var x1 = currDate?.getFullYear();
-		var utcDate2 = new Date(Date.UTC(x1, 2,3,4,5))
-		console.log(utcDate1.toUTCString());
-		*/
-		/*
-		var utcDate = Date.UTC(currDate.getUTCFullYear() ?? null, currDate?.getUTCMonth(), currDate?.getUTCDate(),
-		currDate?.getUTCHours(), currDate?.getUTCMinutes(), currDate?.getUTCSeconds());
-*/
-		console.log("Curr Date: "+ currDate);
-		let x = Date.UTC(2008,3,20,8,30,30,30);
-		console.log("X DateUTC: "+ x);
-		/*
-		var date = new Date(); 
-		var now_utc =  Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
-		date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
-		
-		return new Date(now_utc);
-		*/
 
 
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			//currentDate: context.parameters.CurrentDate.raw ?? undefined,
-			currentDate: new Date(2008,2,20,8,30,30,30),
+			currentDate: context.parameters.CurrentDate.raw ?? undefined,
 			hourvalue:this._hourvalue,
 			minutevalue:this._minutevalue,
 			readonly: this._props.readonly,
