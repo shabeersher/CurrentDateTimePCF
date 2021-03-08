@@ -5,12 +5,25 @@ import * as ReactDOM from 'react-dom';
 //import {ContextualMenu} from 'office-ui-fabric-react';
 import DateControl, {IDateControlProps, IDate} from './DateTImeControl/DateControl'
 import {initializeIcons} from '@fluentui/react/lib/Icons';
+import { values } from "@uifabric/utilities";
+import TimePockerTextBox, {ITimeProps} from "./DateTImeControl/TimeBox"
 
 export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
 	private container: HTMLDivElement;
 	private currentDate: IDate;
-	private notifyOutputChanged: () => void;
+	private _hourvalue: number | undefined;
+	private _minutevalue: number | undefined;
+	private _notifyOutputChanged: () => void;
+	private _props: ITimeProps = { hourvalue : undefined, 
+		minutevalue : undefined,
+		readonly:false,
+		masked:false, 
+		format:"h:mm a",
+		use12Hours:true,
+		//onChange : this.notifyChange.bind(this) 
+	};
+
 	constructor()
 	{
 
@@ -28,8 +41,10 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 	{
 		initializeIcons();
 		this.container = container;
-		this.notifyOutputChanged = notifyOutputChanged;
+		this._notifyOutputChanged = notifyOutputChanged;
 		this.renderControl(context);
+		
+
 		// Add control initialization code
 	}
 
@@ -46,22 +61,52 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 
 	private renderControl(context:ComponentFramework.Context<IInputs>):void{
 		const currentDate = new Date(context.parameters.CurrentDate.raw ?? "");
+		
+		// If the bound attribute is disabled because it is inactive or the user doesn't have access
+		let isReadOnly = context.mode.isControlDisabled;
+
+		let isMasked = false;
+		// When a field has FLS enabled, the security property on the attribute parameter is set
+		if (context.parameters.hourvalue.security) {
+			isReadOnly = isReadOnly || !context.parameters.hourvalue.security.editable;		
+			isMasked = !context.parameters.hourvalue.security.readable
+		}
+		this._hourvalue = context.parameters.hourvalue.raw !== null ? context.parameters.hourvalue.raw : undefined;
+		this._minutevalue = context.parameters.minutevalue.raw !== null ? context.parameters.minutevalue.raw : undefined;
+		let display = context.parameters.displaytype.raw;
+		//update the props
+		
+		this._props.hourvalue = this._hourvalue;
+		this._props.minutevalue = this._minutevalue;
+		this._props.readonly = isReadOnly;
+		this._props.masked = isMasked;
+		this._props.use12Hours = display === "12 hrs";
+		this._props.format = display === "12 hrs" ? "h:mm a" : "k:mm";
+
 
 		const compositeDateControlProps: IDateControlProps = {
-			currentDate: context.parameters.CurrentDate.raw ?? undefined/*,
-			hourvalue: 8,
-			minutevalue: 30,
-			masked: true,
-			format: "h:mm a",
-			use12Hours:true,
-			readonly: true,*/,
+			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
+			currentDate: context.parameters.CurrentDate.raw ?? undefined,
+			hourvalue:this._hourvalue,
+			minutevalue:this._minutevalue,
+			readonly: this._props.readonly,
+			masked: this._props.masked,
+			format:this._props.format,
+			use12Hours:this._props.use12Hours,
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
-				this.notifyOutputChanged();
+				if(context.parameters.CurrentDate.type === "DateAndTime.DateOnly")
+				{
+					console.log("Date only");
+				}
+				else{
+					console.log("Date Time perhaps");
+				}
+				this._notifyOutputChanged();
 			}
 		};
 
-		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
+		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps,this._props), this.container);
 	}
 
 	/** 
@@ -71,7 +116,9 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 	public getOutputs(): IOutputs
 	{
 		return {
-			CurrentDate: this.currentDate.currentDate
+			CurrentDate: this.currentDate.currentDate,
+			hourvalue: this._hourvalue,
+			minutevalue: this._minutevalue
 		};
 	}
 
@@ -84,4 +131,12 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		ReactDOM.unmountComponentAtNode(this.container);
 		// Add code to cleanup control if necessary
 	}
+
+		//Function called when props is signaling an update
+		private notifyChange(hourvalue:number|undefined, minutevalue:number|undefined) {
+		
+			this._hourvalue = hourvalue;
+			this._minutevalue = minutevalue;
+			this._notifyOutputChanged();  //=> will trigger getOutputs
+		}
 }
