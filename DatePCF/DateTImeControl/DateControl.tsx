@@ -1,13 +1,11 @@
 import * as React from 'react';
 import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
-//import TimePicker, { ITimeControlProps } from './TimeBox';
 import TimePicker, { ITimeProps } from './TimeBox';
-import { min } from 'moment';
-
 
 export interface IDate extends ITimeProps{
-  currentDate: Date | undefined;
+  currentDate: Date;
   isDateOnly: boolean;
+  hourValue: number | undefined;
 }
 
 export interface IDateControlProps extends IDate{
@@ -86,7 +84,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             readonly: props.readonly,
             format: props.format,
             use12Hours: props.use12Hours,
-            masked: props.masked
+            masked: props.masked,
+            hourValue: props.hourValue
         };
     }
     private _menuButtonElement = React.createRef<HTMLDivElement>();
@@ -132,7 +131,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         readonly:this.state.readonly,
         masked:this.state.masked,
         format:this.state.format,
-        use12Hours:this.state.use12Hours
+        use12Hours:this.state.use12Hours,
+        hourValue:this.state.hourValue
       };
       this.props.onDateChanged(date);
     }
@@ -160,6 +160,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       console.log("GetCurrentDate Min: "+minute);
       console.log("System Date:"+systemDate)
       var timezone = systemDate.getTimezoneOffset();
+      console.log("TimeZone: "+timezone);
+      systemDate.setHours(systemDate.getHours() + timezone);
+      console.log("SystemDate: "+ systemDate);
       if(isDateAndTime != true) //We are dealing with Date only
       {
         console.log("Date only");
@@ -191,13 +194,15 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             allowTextInput={true}
                             ariaLabel={desc}
                             firstDayOfWeek={firstDayOfWeek}
+                            /*
                             onSelectDate = {(selected => {
                               console.log("selected Date:"+selected)
                               this.setState({
-                                currentDate: selected ?? undefined                                
+                                currentDate: selected                               
                               },this.onDateChanged)
                             })}
-                            value={this.state.currentDate }
+                            */
+                            value={this.state.currentDate}
                         />
                     </Stack>
                     {

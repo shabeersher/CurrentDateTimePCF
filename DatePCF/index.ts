@@ -1,12 +1,9 @@
 import {IInputs, IOutputs} from "./generated/ManifestTypes";
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-//import DatePickerFormatExample from './DateControl';
-//import {ContextualMenu} from 'office-ui-fabric-react';
 import DateControl, {IDateControlProps, IDate} from './DateTImeControl/DateControl'
 import {initializeIcons} from '@fluentui/react/lib/Icons';
-import { values } from "@uifabric/utilities";
-import TimePockerTextBox, {ITimeProps} from "./DateTImeControl/TimeBox"
+import {ITimeProps} from "./DateTImeControl/TimeBox"
 
 export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
@@ -67,10 +64,12 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 
 		let isMasked = false;
 		// When a field has FLS enabled, the security property on the attribute parameter is set
+		/*
 		if (context.parameters.hourvalue.security) {
 			isReadOnly = isReadOnly || !context.parameters.hourvalue.security.editable;		
 			isMasked = !context.parameters.hourvalue.security.readable
 		}
+		*/
 		this._hourvalue = context.parameters.hourvalue.raw !== null ? context.parameters.hourvalue.raw : undefined;
 		this._minutevalue = context.parameters.minutevalue.raw !== null ? context.parameters.minutevalue.raw : undefined;
 		let display = context.parameters.displaytype.raw;
@@ -82,17 +81,51 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		this._props.masked = isMasked;
 		this._props.use12Hours = display === "12 hrs";
 		this._props.format = display === "12 hrs" ? "h:mm a" : "k:mm";
+		
+		let currDate = context.parameters.CurrentDate.raw;
+		if(currentDate != null || currentDate != undefined)
+		{
+			//var something = Date.parse(currDate);
+			/*
+			var utcDate = Date.UTC(currDate?.getUTCFullYear(), currDate?.getUTCMonth(), currDate?.getUTCDate(),
+			currDate?.getUTCHours(), currDate?.getUTCMinutes(), currDate?.getUTCSeconds());
+			*/
+		}
+		console.log("Context Date: "+ context.parameters.CurrentDate.formatted);
+		console.log("Curr Date String: "+ currDate);
+		/*
+		var utcDate1 = new Date(Date.UTC(2008, 1,2,3,4,5));
+		var x1 = currDate?.getFullYear();
+		var utcDate2 = new Date(Date.UTC(x1, 2,3,4,5))
+		console.log(utcDate1.toUTCString());
+		*/
+		/*
+		var utcDate = Date.UTC(currDate.getUTCFullYear() ?? null, currDate?.getUTCMonth(), currDate?.getUTCDate(),
+		currDate?.getUTCHours(), currDate?.getUTCMinutes(), currDate?.getUTCSeconds());
+*/
+		console.log("Curr Date: "+ currDate);
+		let x = Date.UTC(2008,3,20,8,30,30,30);
+		console.log("X DateUTC: "+ x);
+		/*
+		var date = new Date(); 
+		var now_utc =  Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
+		date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
+		
+		return new Date(now_utc);
+		*/
 
 
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			currentDate: context.parameters.CurrentDate.raw ?? undefined,
+			//currentDate: context.parameters.CurrentDate.raw ?? undefined,
+			currentDate: new Date(2008,2,20,8,30,30,30),
 			hourvalue:this._hourvalue,
 			minutevalue:this._minutevalue,
 			readonly: this._props.readonly,
 			masked: this._props.masked,
 			format:this._props.format,
 			use12Hours:this._props.use12Hours,
+			hourValue: context.parameters.hourvalue.raw ?? undefined,
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				if(context.parameters.CurrentDate.type === "DateAndTime.DateOnly")
