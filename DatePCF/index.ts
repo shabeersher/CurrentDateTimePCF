@@ -5,6 +5,8 @@ import DateControl, {IDateControlProps, IDate} from './DateTImeControl/DateContr
 import {initializeIcons} from '@fluentui/react/lib/Icons';
 import {ITimeProps} from "./DateTImeControl/TimeBox"
 import { Context } from "vm";
+import {Moment} from 'moment';
+import moment = require('moment');
 
 export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
@@ -99,11 +101,13 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		let display = context.parameters.displaytype.raw;
 		//update the props
 		
-		let currDate = context.parameters.CurrentDate.raw != undefined ? new Date(context.parameters.CurrentDate.raw) : new Date();
+		let currDate = moment(context.parameters.CurrentDate.raw as Date);
+		
+		//let currDate = context.parameters.CurrentDate.raw != undefined ? new Date(context.parameters.CurrentDate.raw) : new Date();
 		console.log("Raw Current Date: "+ context.parameters.CurrentDate.raw);
 		console.log("Formatted Current Date: "+ context.parameters.CurrentDate.formatted);
 		console.log("CurrDate: "+ currDate);
-		var utcCurrDate = this.getUtcDate(currDate);
+		var utcCurrDate = this.getUtcDate(currDate.toDate());
 		console.log("UTC Curr Date: "+ utcCurrDate);
 		var convertedUTCDate = this.convertDate(utcCurrDate);
 		console.log("Converted Date: "+ convertedUTCDate);
@@ -119,7 +123,7 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			currentDate: convertedUTCDate ?? undefined,
+			currentDate: context.parameters.CurrentDate.raw != null ? convertedUTCDate : undefined,
 			hourvalue:context.parameters.hourvalue.raw ?? undefined,
 			minutevalue:context.parameters.minutevalue.raw ?? undefined,
 			readonly: this._props.readonly,
