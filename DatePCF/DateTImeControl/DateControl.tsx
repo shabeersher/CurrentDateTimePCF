@@ -2,20 +2,17 @@ import * as React from 'react';
 import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
 import TimePicker, { ITimeProps } from './TimeBox';
 
-
 export interface IDate extends ITimeProps{
   currentDate: Date | undefined;
   isDateOnly: boolean;
 }
-
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
 
 }
-
 interface IDateControlState extends IDate{
-    isCalloutVisible: boolean;
 }
+
 const DayPickerStrings: IDatePickerStrings = {
     months: [
       'January',
@@ -59,9 +56,6 @@ const DayPickerStrings: IDatePickerStrings = {
     },
   });
   const onFormatDate = (date?: Date): string => {
-    console.log("Date:"+date?.getDate());
-    console.log("Month:"+date?.getMonth());
-    console.log("Year:"+date?.getFullYear());
     return !date ? '' : date.getDate() + '/' + (date.getMonth() + 1) + '/' + (date.getFullYear() % 100);
   };
 
@@ -77,7 +71,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
     constructor(props:IDateControlProps){
         super(props);
         this.state = {
-            isCalloutVisible: false,
             currentDate : props.currentDate,
             isDateOnly: props.isDateOnly,
             hourvalue: props.hourvalue,
@@ -90,18 +83,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         };
     }
     private _menuButtonElement = React.createRef<HTMLDivElement>();
-      
-    private showPopup = () => {
-        this.setState({
-            isCalloutVisible: true
-        });
-    }
-
-    private hidePopup = () => {
-        this.setState({
-            isCalloutVisible: false
-        });
-    }
 
     private setDate = (date:Date) =>{
       console.log(date);
@@ -156,37 +137,18 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var day = systemDate.getDate();
       var hour = systemDate.getHours();
       var minute = systemDate.getMinutes();
-      /*
-      var year = systemDate.getUTCFullYear();
-      var month = systemDate.getUTCMonth();
-      var day = systemDate.getUTCDate();
-      var hour = systemDate.getUTCHours();
-      var minute = systemDate.getUTCMinutes();
-      
-      console.log("GetCurrentDate Month: "+month);
-      console.log("GetCurrentDate Date: "+day);
-      console.log("GetCurrentDate Hour: "+hour);
-      console.log("GetCurrentDate Min: "+minute);
-      console.log("System Date:"+systemDate)
-      */
-      var timezone = systemDate.getTimezoneOffset();
       if(isDateAndTime != true) //We are dealing with Date only
       {
         console.log("Date only");
         if(year != null && month != null && day != null)
         {
-          //var utcDate = Date.UTC(year, month, day);
-          //console.log("UTCDate: "+ utcDate);
-          //this.setDate(new Date(utcDate));
           this.setDate(new Date(year, month, day));
         }
       }
       else
       {
-        //console.log("Date and Time only");
         if(year != null && month != null && day != null && hour != null && minute != null )
         {
-          //console.log("Setting Date Time")
           this.setDateTime(new Date(year, month, day), hour, minute)
         }
       }
