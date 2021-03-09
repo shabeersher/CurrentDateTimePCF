@@ -4,11 +4,14 @@ import * as ReactDOM from 'react-dom';
 import DateControl, {IDateControlProps, IDate} from './DateTImeControl/DateControl'
 import {initializeIcons} from '@fluentui/react/lib/Icons';
 import {ITimeProps} from "./DateTImeControl/TimeBox"
+import { Context } from "vm";
 
 export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
 	private container: HTMLDivElement;
+	private context: Context;
 	private currentDate: IDate;
+	private notifyOutputChanged: () => void;
 	private _hourvalue: number | undefined;
 	private _minutevalue: number | undefined;
 	private _notifyOutputChanged: () => void;
@@ -18,7 +21,7 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		masked:false, 
 		format:"h:mm a",
 		use12Hours:true,
-		//onChange : this.notifyChange.bind(this) 
+		onChange : this.notifyChange.bind(this) 
 	};
 
 	constructor()
@@ -55,10 +58,31 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		this.renderControl(context);
 		// Add code to update control view
 	}
+	
+	private convertDate(value:Date)
+	{
+		const offsetMinutes = this.context.userSettings.getTimeZoneOffsetMinutes(value);
+		const localDate = this.addMinutes(value, offsetMinutes);
+		return this.getUtcDate(localDate);
+	}
+
+	private getUtcDate(localDate: Date) {
+		return  new  Date(
+			localDate.getUTCFullYear(),
+			localDate.getUTCMonth(),
+			localDate.getUTCDate(),
+			localDate.getUTCHours(),
+			localDate.getUTCMinutes(),
+		);
+	}
+
+	addMinutes(date: Date, minutes: number): Date {
+		return new Date(date.getTime() + minutes * 60000);
+	}
 
 	private renderControl(context:ComponentFramework.Context<IInputs>):void{
 		const currentDate = new Date(context.parameters.CurrentDate.raw ?? "");
-		
+		this.context = context;
 		// If the bound attribute is disabled because it is inactive or the user doesn't have access
 		let isReadOnly = context.mode.isControlDisabled;
 
@@ -75,26 +99,40 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		let display = context.parameters.displaytype.raw;
 		//update the props
 		
+		let currDate = context.parameters.CurrentDate.raw != undefined ? new Date(context.parameters.CurrentDate.raw) : new Date();
+		console.log("Raw Current Date: "+ context.parameters.CurrentDate.raw);
+		console.log("Formatted Current Date: "+ context.parameters.CurrentDate.formatted);
+		console.log("CurrDate: "+ currDate);
+		var utcCurrDate = this.getUtcDate(currDate);
+		console.log("UTC Curr Date: "+ utcCurrDate);
+		var convertedUTCDate = this.convertDate(utcCurrDate);
+		console.log("Converted Date: "+ convertedUTCDate);
+
 		this._props.hourvalue = this._hourvalue;
 		this._props.minutevalue = this._minutevalue;
 		this._props.readonly = isReadOnly;
 		this._props.masked = isMasked;
 		this._props.use12Hours = display === "12 hrs";
 		this._props.format = display === "12 hrs" ? "h:mm a" : "k:mm";
+		
 
 
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			currentDate: context.parameters.CurrentDate.raw ?? undefined,
-			hourvalue:this._hourvalue,
-			minutevalue:this._minutevalue,
+			currentDate: convertedUTCDate ?? undefined,
+			hourvalue:context.parameters.hourvalue.raw ?? undefined,
+			minutevalue:context.parameters.minutevalue.raw ?? undefined,
 			readonly: this._props.readonly,
 			masked: this._props.masked,
 			format:this._props.format,
 			use12Hours:this._props.use12Hours,
-			hourValue: context.parameters.hourvalue.raw ?? undefined,
+			onChange:(hourvalue, minutevalue) => {
+				console.log("On Change is called");
+				this.notifyChange(hourvalue, minutevalue);
+			},
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
+				this._notifyOutputChanged();
 				if(context.parameters.CurrentDate.type === "DateAndTime.DateOnly")
 				{
 					console.log("Date only");
@@ -102,7 +140,6 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 				else{
 					console.log("Date Time perhaps");
 				}
-				this._notifyOutputChanged();
 			}
 		};
 
@@ -133,10 +170,10 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 	}
 
 		//Function called when props is signaling an update
-		private notifyChange(hourvalue:number|undefined, minutevalue:number|undefined) {
-		
-			this._hourvalue = hourvalue;
-			this._minutevalue = minutevalue;
-			this._notifyOutputChanged();  //=> will trigger getOutputs
-		}
+	private notifyChange(hourvalue:number|undefined, minutevalue:number|undefined) {
+	
+		this._hourvalue = hourvalue;
+		this._minutevalue = minutevalue;
+		this._notifyOutputChanged();  //=> will trigger getOutputs
+	}
 }

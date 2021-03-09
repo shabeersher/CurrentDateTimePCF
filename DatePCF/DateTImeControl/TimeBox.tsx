@@ -13,7 +13,8 @@ export interface ITimeProps {
     masked:boolean;
     format:"h:mm a"|"k:mm";
     use12Hours:boolean;
-    //onChange: (hourvalue:number|undefined,minutevalue:number|undefined) => void;
+    
+    onChange: (hourvalue:number|undefined,minutevalue:number|undefined) => void;
 }
 
 const TimePickerTextBox = (props : ITimeProps): JSX.Element => {
@@ -54,14 +55,14 @@ const TimePickerTextBox = (props : ITimeProps): JSX.Element => {
             (props.hourvalue !== undefined || props.minutevalue !== undefined))
         {
             //CLEAR
-            //props.onChange(undefined,undefined)
+            props.onChange(undefined,undefined)
         }
         else if(timevalue !== null && timevalue !== undefined && (timevalue.hours() !== props.hourvalue 
                                                     || 
                                             timevalue.minutes() !== props.minutevalue))
         {
             //UPDATE WITH NEW VALUE
-            //props.onChange(timevalue.hours(),timevalue.minutes())
+            props.onChange(timevalue.hours(),timevalue.minutes())
         }      
     }, [timevalue]);
 

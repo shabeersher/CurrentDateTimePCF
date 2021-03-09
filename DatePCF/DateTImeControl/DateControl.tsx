@@ -6,8 +6,6 @@ import TimePicker, { ITimeProps } from './TimeBox';
 export interface IDate extends ITimeProps{
   currentDate: Date | undefined;
   isDateOnly: boolean;
-  hourValue: number | undefined;
-  //onChange:(hourValue:number, minuteValue: number) => void;
 }
 
 export interface IDateControlProps extends IDate{
@@ -88,7 +86,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             format: props.format,
             use12Hours: props.use12Hours,
             masked: props.masked,
-            hourValue: props.hourValue
+            onChange:props.onChange,
         };
     }
     private _menuButtonElement = React.createRef<HTMLDivElement>();
@@ -135,15 +133,16 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         masked:this.state.masked,
         format:this.state.format,
         use12Hours:this.state.use12Hours,
-        hourValue:this.state.hourValue
+        onChange:this.state.onChange,
       };
       this.props.onDateChanged(date);
+      
     }
 
     private onTimeChanged = () =>{
         var hour = this.props.hourvalue;
         var minute = this.props.minutevalue;
-        //this.props.onChange(hour, minute);
+        this.props.onChange(hour, minute);
 
         console.log("Hour is: "+this.props.hourvalue);
     }
@@ -157,26 +156,37 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var day = systemDate.getDate();
       var hour = systemDate.getHours();
       var minute = systemDate.getMinutes();
+      /*
+      var year = systemDate.getUTCFullYear();
+      var month = systemDate.getUTCMonth();
+      var day = systemDate.getUTCDate();
+      var hour = systemDate.getUTCHours();
+      var minute = systemDate.getUTCMinutes();
+      
       console.log("GetCurrentDate Month: "+month);
       console.log("GetCurrentDate Date: "+day);
       console.log("GetCurrentDate Hour: "+hour);
       console.log("GetCurrentDate Min: "+minute);
       console.log("System Date:"+systemDate)
+      */
       var timezone = systemDate.getTimezoneOffset();
       if(isDateAndTime != true) //We are dealing with Date only
       {
         console.log("Date only");
         if(year != null && month != null && day != null)
         {
-          this.setDate(new Date(year, month, day))
+          //var utcDate = Date.UTC(year, month, day);
+          //console.log("UTCDate: "+ utcDate);
+          //this.setDate(new Date(utcDate));
+          this.setDate(new Date(year, month, day));
         }
       }
       else
       {
-        console.log("Date and Time only");
+        //console.log("Date and Time only");
         if(year != null && month != null && day != null && hour != null && minute != null )
         {
-          console.log("Setting Date Time")
+          //console.log("Setting Date Time")
           this.setDateTime(new Date(year, month, day), hour, minute)
         }
       }
@@ -207,13 +217,13 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                       this.state.isDateOnly === false ?                     
                           <Stack tokens={{childrenGap:10, padding:10}}>
                           <TimePicker 
-                          hourvalue = {this.state.hourValue}
+                          hourvalue = {this.state.hourvalue}
                           minutevalue= {this.state.minutevalue}
                           readonly= {false}
                           masked = {false}
                           format = {this.props.format}
                           use12Hours = {this.props.use12Hours}
-                          
+                          onChange = {this.props.onChange}
                           />
                         </Stack> : null
                     }
