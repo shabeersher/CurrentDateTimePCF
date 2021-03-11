@@ -4,6 +4,7 @@ import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeSt
 export interface IDate {
   currentDate: Date | undefined;
   isDateOnly: boolean;
+  userLanguage: number;
 }
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
@@ -12,7 +13,8 @@ export interface IDateControlProps extends IDate{
 interface IDateControlState extends IDate{
 }
 
-const DayPickerStrings: IDatePickerStrings = {
+
+const DayPickerEnglishStrings: IDatePickerStrings = {
     months: [
       'January',
       'February',
@@ -48,6 +50,42 @@ const DayPickerStrings: IDatePickerStrings = {
     invalidInputErrorMessage: 'Invalid date format.',
   };
 
+  const DayPickerFrenchStrings: IDatePickerStrings = {
+    months: [
+      'janvier',
+      'février',
+      'mars',
+      'avril',
+      'mai',
+      'juin',
+      'juillet',
+      'août',
+      'septembre',
+      'octobre',
+      'novembre',
+      'décembre',
+    ],
+  
+    shortMonths: ['janv', 'févr', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc'],
+  
+    days: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'],
+  
+    shortDays: ['di', 'lu', 'ma', 'me', 'je', 've', 'sa'],
+  
+    goToToday: 'Aller à aujourd’hui',
+    prevMonthAriaLabel: 'Aller au mois précédent',
+    nextMonthAriaLabel: 'Aller au mois prochain',
+    prevYearAriaLabel: 'Aller à l’année précédente',
+    nextYearAriaLabel: 'Aller à l’année prochaine',
+    closeButtonAriaLabel: 'Fermer date picker',
+    monthPickerHeaderAriaLabel: '{0}, choisir de changer l’année',
+    yearPickerHeaderAriaLabel: '{0}, sélectionnez pour changer le mois',
+  
+    isRequiredErrorMessage: 'La date de début est requise.',
+  
+    invalidInputErrorMessage: 'Format de date non valide.',
+  };
+
   const controlClass = mergeStyleSets({
     control: {
       margin: '0 0 15px 0',
@@ -55,11 +93,11 @@ const DayPickerStrings: IDatePickerStrings = {
     },
   });
   const onFormatDate = (date?: Date): string => {
-    return !date ? '' : date.getDate() + '/' + (date.getMonth() + 1) + '/' + (date.getFullYear() % 100);
+    return !date ? '' : date.getDate() + '/' + (date.getMonth() + 1) + '/' + (date.getFullYear());
   };
 
   
-const desc = 'This field is required. One of the support input formats is year dash month dash day.';
+const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutien est le jour du dash du mois de tiret de l’année.';
 
 const firstDayOfWeek = DayOfWeek.Sunday;
 
@@ -71,7 +109,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         super(props);
         this.state = {
             currentDate : props.currentDate,
-            isDateOnly: props.isDateOnly
+            isDateOnly: props.isDateOnly,
+            userLanguage: props.userLanguage
         };
     }
 
@@ -85,7 +124,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
     private onDateChanged = () =>{
       const date: IDate={
         currentDate:this.state.currentDate,
-        isDateOnly:this.state.isDateOnly
+        isDateOnly:this.state.isDateOnly,
+        userLanguage:this.state.userLanguage
       };
       this.props.onDateChanged(date);
       
@@ -98,8 +138,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
       var day = systemDate.getDate();
-      var hour = systemDate.getHours();
-      var minute = systemDate.getMinutes();
       if(isDateAndTime != true) //We are dealing with Date only
       {
         console.log("Date only");
@@ -121,8 +159,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             allowTextInput={true}
                             ariaLabel={desc}
                             firstDayOfWeek={firstDayOfWeek}
+                            strings = {this.state.userLanguage == 1036 ? DayPickerFrenchStrings : DayPickerEnglishStrings}
+                            formatDate = {onFormatDate}
                             onSelectDate = {(selected => {
-                              console.log("selected Date:"+selected)
                               this.setState({
                                 currentDate: selected ?? undefined                                
                               },this.onDateChanged)
@@ -132,7 +171,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
                         <PrimaryButton 
-                                text={"Current Date"}
+                                text={this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date"}
                                 onClick={this.getCurrentDate}
                             />
                     </Stack>

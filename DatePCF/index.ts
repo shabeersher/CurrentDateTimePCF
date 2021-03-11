@@ -78,6 +78,7 @@ export class CurrentDateTimePCF implements ComponentFramework.StandardControl<II
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
 			currentDate: context.parameters.CurrentDate.raw != null ? convertedUTCDate : undefined,
+			userLanguage: userLanguage,
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				this._notifyOutputChanged();
