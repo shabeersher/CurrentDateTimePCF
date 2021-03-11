@@ -3,29 +3,16 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import DateControl, {IDateControlProps, IDate} from './DateTImeControl/DateControl'
 import {initializeIcons} from '@fluentui/react/lib/Icons';
-import {ITimeProps} from "./DateTImeControl/TimeBox"
 import { Context } from "vm";
-import {Moment} from 'moment';
 import moment = require('moment');
 
-export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
+export class CurrentDateTimePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
 	private container: HTMLDivElement;
 	private context: Context;
 	private currentDate: IDate;
 	private notifyOutputChanged: () => void;
-	private _hourvalue: number | undefined;
-	private _minutevalue: number | undefined;
 	private _notifyOutputChanged: () => void;
-	private _props: ITimeProps = { hourvalue : undefined, 
-		minutevalue : undefined,
-		readonly:false,
-		masked:false, 
-		format:"h:mm a",
-		use12Hours:true,
-		onChange : this.notifyChange.bind(this) 
-	};
-
 	constructor()
 	{
 
@@ -45,8 +32,6 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 		this.container = container;
 		this._notifyOutputChanged = notifyOutputChanged;
 		this.renderControl(context);
-		
-
 		// Add control initialization code
 	}
 
@@ -83,71 +68,23 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 	}
 
 	private renderControl(context:ComponentFramework.Context<IInputs>):void{
-		const currentDate = new Date(context.parameters.CurrentDate.raw ?? "");
 		this.context = context;
-		// If the bound attribute is disabled because it is inactive or the user doesn't have access
-		let isReadOnly = context.mode.isControlDisabled;
 
-		let isMasked = false;
-		// When a field has FLS enabled, the security property on the attribute parameter is set
-		/*
-		if (context.parameters.hourvalue.security) {
-			isReadOnly = isReadOnly || !context.parameters.hourvalue.security.editable;		
-			isMasked = !context.parameters.hourvalue.security.readable
-		}
-		*/
-		this._hourvalue = context.parameters.hourvalue.raw !== null ? context.parameters.hourvalue.raw : undefined;
-		this._minutevalue = context.parameters.minutevalue.raw !== null ? context.parameters.minutevalue.raw : undefined;
-		let display = context.parameters.displaytype.raw;
-		//update the props
-		
+		let userLanguage = context.userSettings.languageId;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
-		
-		//let currDate = context.parameters.CurrentDate.raw != undefined ? new Date(context.parameters.CurrentDate.raw) : new Date();
-		console.log("Raw Current Date: "+ context.parameters.CurrentDate.raw);
-		console.log("Formatted Current Date: "+ context.parameters.CurrentDate.formatted);
-		console.log("CurrDate: "+ currDate);
 		var utcCurrDate = this.getUtcDate(currDate.toDate());
-		console.log("UTC Curr Date: "+ utcCurrDate);
 		var convertedUTCDate = this.convertDate(utcCurrDate);
-		console.log("Converted Date: "+ convertedUTCDate);
-
-		this._props.hourvalue = this._hourvalue;
-		this._props.minutevalue = this._minutevalue;
-		this._props.readonly = isReadOnly;
-		this._props.masked = isMasked;
-		this._props.use12Hours = display === "12 hrs";
-		this._props.format = display === "12 hrs" ? "h:mm a" : "k:mm";
-		
-
 
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
 			currentDate: context.parameters.CurrentDate.raw != null ? convertedUTCDate : undefined,
-			hourvalue:context.parameters.hourvalue.raw ?? undefined,
-			minutevalue:context.parameters.minutevalue.raw ?? undefined,
-			readonly: this._props.readonly,
-			masked: this._props.masked,
-			format:this._props.format,
-			use12Hours:this._props.use12Hours,
-			onChange:(hourvalue, minutevalue) => {
-				console.log("On Change is called");
-				this.notifyChange(hourvalue, minutevalue);
-			},
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				this._notifyOutputChanged();
-				if(context.parameters.CurrentDate.type === "DateAndTime.DateOnly")
-				{
-					console.log("Date only");
-				}
-				else{
-					console.log("Date Time perhaps");
-				}
 			}
 		};
 
-		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps,this._props), this.container);
+		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
 	}
 
 	/** 
@@ -157,9 +94,7 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 	public getOutputs(): IOutputs
 	{
 		return {
-			CurrentDate: this.currentDate.currentDate,
-			hourvalue: this._hourvalue,
-			minutevalue: this._minutevalue
+			CurrentDate: this.currentDate.currentDate
 		};
 	}
 
@@ -171,13 +106,5 @@ export class DatePCF implements ComponentFramework.StandardControl<IInputs, IOut
 	{
 		ReactDOM.unmountComponentAtNode(this.container);
 		// Add code to cleanup control if necessary
-	}
-
-		//Function called when props is signaling an update
-	private notifyChange(hourvalue:number|undefined, minutevalue:number|undefined) {
-	
-		this._hourvalue = hourvalue;
-		this._minutevalue = minutevalue;
-		this._notifyOutputChanged();  //=> will trigger getOutputs
 	}
 }

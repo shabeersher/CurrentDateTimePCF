@@ -1,8 +1,7 @@
 import * as React from 'react';
 import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
-import TimePicker, { ITimeProps } from './TimeBox';
 
-export interface IDate extends ITimeProps{
+export interface IDate {
   currentDate: Date | undefined;
   isDateOnly: boolean;
 }
@@ -72,17 +71,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         super(props);
         this.state = {
             currentDate : props.currentDate,
-            isDateOnly: props.isDateOnly,
-            hourvalue: props.hourvalue,
-            minutevalue: props.minutevalue,
-            readonly: props.readonly,
-            format: props.format,
-            use12Hours: props.use12Hours,
-            masked: props.masked,
-            onChange:props.onChange,
+            isDateOnly: props.isDateOnly
         };
     }
-    private _menuButtonElement = React.createRef<HTMLDivElement>();
 
     private setDate = (date:Date) =>{
       console.log(date);
@@ -91,41 +82,13 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       }, this.onDateChanged)
     }
 
-    private setDateTime = (date:Date, hour:number, minute:number) =>{
-      console.log(date);
-      this.setState({
-        currentDate: date,
-        hourvalue: hour,
-        minutevalue: minute
-      }, this.onDateChanged)
-    }
-
-    private formatDate = (date:Date) =>{
-      return !date ? '' : date.getDate() + '/' + (date.getMonth() + 1) + '/' + (date.getFullYear() % 100);
-    }
-
     private onDateChanged = () =>{
       const date: IDate={
         currentDate:this.state.currentDate,
-        isDateOnly:this.state.isDateOnly,
-        hourvalue:this.state.hourvalue,
-        minutevalue:this.state.minutevalue,
-        readonly:this.state.readonly,
-        masked:this.state.masked,
-        format:this.state.format,
-        use12Hours:this.state.use12Hours,
-        onChange:this.state.onChange,
+        isDateOnly:this.state.isDateOnly
       };
       this.props.onDateChanged(date);
       
-    }
-
-    private onTimeChanged = () =>{
-        var hour = this.props.hourvalue;
-        var minute = this.props.minutevalue;
-        this.props.onChange(hour, minute);
-
-        console.log("Hour is: "+this.props.hourvalue);
     }
 
     private getCurrentDate = () =>{
@@ -145,14 +108,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
           this.setDate(new Date(year, month, day));
         }
       }
-      else
-      {
-        if(year != null && month != null && day != null && hour != null && minute != null )
-        {
-          this.setDateTime(new Date(year, month, day), hour, minute)
-        }
-      }
-
     }
 
     render(){
@@ -175,20 +130,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             value={this.state.currentDate }
                         />
                     </Stack>
-                    {
-                      this.state.isDateOnly === false ?                     
-                          <Stack tokens={{childrenGap:10, padding:10}}>
-                          <TimePicker 
-                          hourvalue = {this.state.hourvalue}
-                          minutevalue= {this.state.minutevalue}
-                          readonly= {false}
-                          masked = {false}
-                          format = {this.props.format}
-                          use12Hours = {this.props.use12Hours}
-                          onChange = {this.props.onChange}
-                          />
-                        </Stack> : null
-                    }
                     <Stack tokens={{childrenGap:10, padding:10}}>
                         <PrimaryButton 
                                 text={"Current Date"}
