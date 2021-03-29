@@ -93,8 +93,13 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
     },
   });
   const onFormatDate = (date?: Date): string => {
-    return !date ? '' : date.getDate() + '/' + (date.getMonth() + 1) + '/' + (date.getFullYear());
+    return !date ? '' : date.getDate() + '/' + (getMonth(date)) + '/' + (date.getFullYear());
   };
+
+  const getMonth = (date: Date): string => {
+    var month = date.getMonth() + 1;
+    return month < 10 ? '0' + month : '' + month;
+  }
 
   
 const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutien est le jour du dash du mois de tiret de l’année.';
@@ -156,7 +161,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         <DatePicker 
                             className={controlClass.control}
                             isRequired={false}
-                            allowTextInput={true}
+                            allowTextInput={false}
                             ariaLabel={desc}
                             firstDayOfWeek={firstDayOfWeek}
                             strings = {this.state.userLanguage == 1036 ? DayPickerFrenchStrings : DayPickerEnglishStrings}
