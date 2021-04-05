@@ -93,18 +93,39 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
     },
   });
   const onFormatDate = (date?: Date): string => {
-    return !date ? '' : date.getDate() + '/' + (getMonth(date)) + '/' + (date.getFullYear());
+    return !date ? '' : (getDay(date)) + '/' + (getMonth(date)) + '/' + (date.getFullYear());
   };
+
+  const onParseDateFromString = (val: string): Date =>{
+    const date = new Date(val) || new Date();
+    const values = (val || '').trim().split('/');
+    const day = val.length > 0 ? Math.max(1, Math.min(31, parseInt(values[0], 10))) : date.getDate();
+    const month = val.length > 1 ? Math.max(1, Math.min(12, parseInt(values[1], 10))) - 1 : date.getMonth();
+    let year = val.length > 2 ? parseInt(values[2], 10) : date.getFullYear();
+    if (year < 100) {
+      year += date.getFullYear() - (date.getFullYear() % 100);
+    }
+    return new Date(year, month, day);
+  }
+
 
   const getMonth = (date: Date): string => {
     var month = date.getMonth() + 1;
     return month < 10 ? '0' + month : '' + month;
   }
 
+  const getDay = (date: Date): string => {
+    var day = date.getDate();
+    return day < 10 ? '0' + day : '' + day;
+  }
+  
+
   
 const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutien est le jour du dash du mois de tiret de l’année.';
 
 const firstDayOfWeek = DayOfWeek.Sunday;
+
+
 
 
 
@@ -161,11 +182,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         <DatePicker 
                             className={controlClass.control}
                             isRequired={false}
-                            allowTextInput={false}
+                            allowTextInput={true}
                             ariaLabel={desc}
                             firstDayOfWeek={firstDayOfWeek}
                             strings = {this.state.userLanguage == 1036 ? DayPickerFrenchStrings : DayPickerEnglishStrings}
                             formatDate = {onFormatDate}
+                            parseDateFromString = {onParseDateFromString}
                             onSelectDate = {(selected => {
                               this.setState({
                                 currentDate: selected ?? undefined                                
