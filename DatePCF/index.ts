@@ -1,12 +1,12 @@
 import {IInputs, IOutputs} from "./generated/ManifestTypes";
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import DateControl, {IDateControlProps, IDate} from './DateTImeControl/DateControl'
+import DateControl, {IDateControlProps, IDate} from './DateTimeControl/DateControl'
 import {initializeIcons} from '@fluentui/react/lib/Icons';
 import { Context } from "vm";
 import moment = require('moment');
 
-export class CurrentDateTimePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
+export class CurrentDatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
 	private container: HTMLDivElement;
 	private context: Context;

@@ -1,11 +1,12 @@
 <?xml version="1.2.0.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="DATETIMECONTROL" constructor="CurrentDateTimePCF" version="1.1.0" display-name-key="CurrentDateTimePCF" description-key="DateTimePCF description use for current date/time" control-type="standard">
+  <control namespace="DATECONTROL" constructor="CurrentDatePCF" version="1.1.1" display-name-key="CurrentDatePCF" description-key="DatePCF description use for current date/time" control-type="standard">
     <!-- property node identifies a specific, configurable piece of data that the control expects from CDS -->
     <type-group name="datetime">
       <type>DateAndTime.DateOnly</type>
     </type-group>
     <property name="CurrentDate" display-name-key="CurrentDate" description-key="Current Date field" of-type-group="datetime" usage="bound" required="true" />
+
     <!-- 
       Property node's of-type attribute can be of-type-group attribute. 
       Example:
@@ -20,11 +21,11 @@
     <resources>
       <code path="index.ts" order="1"/>
 
-            <!-- UNCOMMENT TO ADD MORE RESOURCES
+     <!-- UNCOMMENT TO ADD MORE RESOURCES           
       <css path="DateTimeControl/css/TimePicker.css" order="1" />
 
       <resx path="strings/DatePCF.1033.resx" version="1.0.0" />
-      -->
+    -->
     </resources>
     <!-- UNCOMMENT TO ENABLE THE SPECIFIED API
     <feature-usage>
