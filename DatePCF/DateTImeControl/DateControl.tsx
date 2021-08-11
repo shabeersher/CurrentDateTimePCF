@@ -1,10 +1,14 @@
 import * as React from 'react';
 import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
+import { IInputs } from '../generated/ManifestTypes';
+import { stringify } from 'querystring';
+import { isDate } from 'moment';
 
 export interface IDate {
   currentDate: Date | undefined;
   isDateOnly: boolean;
   userLanguage: number;
+  userContext: ComponentFramework.Context<IInputs> ;
 }
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
@@ -92,9 +96,11 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
       maxWidth: '300px',
     },
   });
+  /*
   const onFormatDate = (date?: Date): string => {
     return !date ? '' : (getDay(date)) + '/' + (getMonth(date)) + '/' + (date.getFullYear());
   };
+*/
 
   const onParseDateFromString = (val: string): Date =>{
     const date = new Date(val) || new Date();
@@ -108,7 +114,7 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
     return new Date(year, month, day);
   }
 
-
+/*
   const getMonth = (date: Date): string => {
     var month = date.getMonth() + 1;
     return month < 10 ? '0' + month : '' + month;
@@ -118,7 +124,7 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
     var day = date.getDate();
     return day < 10 ? '0' + day : '' + day;
   }
-  
+  */
 
   
 const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutien est le jour du dash du mois de tiret de l’année.';
@@ -136,8 +142,118 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         this.state = {
             currentDate : props.currentDate,
             isDateOnly: props.isDateOnly,
-            userLanguage: props.userLanguage
+            userLanguage: props.userLanguage,
+            userContext: props.userContext
         };
+    }
+
+    private dateFormat = (date?:Date): string =>{
+      var dateFormat = this.state.userContext.userSettings.dateFormattingInfo.shortDatePattern;
+      var dateSeparator = this.state.userContext.userSettings.dateFormattingInfo.dateSeparator;
+      var splitDateFormat = dateFormat.split("/");
+
+      var firstPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[0] as string);
+      var secondPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[1] as string);
+      var thirdPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[2] as string);
+      
+      console.log("firstPosition: "+ firstPosition);
+      console.log("secondPosition: "+ secondPosition);
+      console.log("thirdPosition: "+ thirdPosition);
+
+      console.log("User dateFormat: "+ dateFormat);
+      console.log("dateSeparator: "+ dateSeparator);
+      console.log("splitDateFormat: "+ splitDateFormat);
+      return !date ? '' : firstPosition + dateSeparator + secondPosition + dateSeparator + thirdPosition;
+    }
+    
+    private retrieveDateFormatValue = (date: Date, splitDateFormat: string): string =>{
+      console.log("date in retrieveDateFormateValue: "+ date);
+      console.log("splitDateFormat in retrieveDateFormateValue: "+ splitDateFormat);
+      var dateString = "";
+      if(splitDateFormat != undefined && splitDateFormat != null)
+      {
+        console.log("inside first if of SplitDateFormat");
+          if(splitDateFormat.toUpperCase().includes("D"))
+          dateString = this.getDay(date, splitDateFormat);
+        else if(splitDateFormat.toUpperCase().includes("M"))
+          dateString = this.getMonth(date, splitDateFormat);
+        else if(splitDateFormat.toUpperCase().includes("Y"))
+          dateString = this.getFullYear(date, splitDateFormat);
+      }
+      return dateString;
+    }
+  
+    private getMonth = (date: Date, format: string): string => {
+      var dateMonth = date.getMonth() + 1;
+      var formattedMonth = "";
+      if(format != undefined && format != null)
+      {
+        format = format.toUpperCase();
+        switch(format)
+        {
+          case "M":
+            formattedMonth = dateMonth + "";
+            break;
+          case "MM":
+            if(dateMonth < 10)
+              formattedMonth = '0' + dateMonth;
+            else
+              formattedMonth = dateMonth + "";
+            break;
+          case "MMM":
+            formattedMonth = date.toLocaleString('default',{month:'short'})
+            break;
+        }
+      }
+      return formattedMonth != "" ? formattedMonth : dateMonth +"";
+    }
+  
+    private getDay = (date: Date, format: string): string => {
+      var day = date.getDate();
+      var stringDateDay = day.toString();
+      var formattedDay = "";
+      if(formattedDay != undefined && formattedDay != null)
+      {
+        format = format.toUpperCase();
+        switch(format)
+        {
+          case "D":
+            if(day < 10)
+              formattedDay =  stringDateDay.substring(stringDateDay.length - 1, stringDateDay.length);
+            else
+              formattedDay = day.toString();
+            break;
+          case "DD":
+            if(day < 10)
+            formattedDay =  '0' + stringDateDay.substring(stringDateDay.length - 1, stringDateDay.length);
+          else
+            formattedDay = day.toString();
+            break;
+        }
+      }
+      return formattedDay != "" ? formattedDay : day + "";
+      //return day < 10 ? '0' + day : '' + day;
+    }
+
+    private getFullYear = (date: Date, format: string): string =>{
+      var fullYear = date.getFullYear();
+      var stringDateYear = fullYear.toString();
+      var formattedDateYear = "";
+      if(format != undefined && format != null)
+      {
+        format = format.toUpperCase();
+        switch(format)
+        {
+          case "YY":
+            formattedDateYear = stringDateYear.substring(stringDateYear.length - 2, stringDateYear.length);
+            break;
+          case "YYYY":
+            formattedDateYear = stringDateYear.substring(stringDateYear.length - 4, stringDateYear.length);
+            break;
+                
+        }
+      }
+      return formattedDateYear != "" ? formattedDateYear : fullYear + "";
     }
 
     private setDate = (date:Date) =>{
@@ -151,7 +267,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       const date: IDate={
         currentDate:this.state.currentDate,
         isDateOnly:this.state.isDateOnly,
-        userLanguage:this.state.userLanguage
+        userLanguage:this.state.userLanguage,
+        userContext: this.state.userContext
       };
       this.props.onDateChanged(date);
       
@@ -172,6 +289,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
           this.setDate(new Date(year, month, day));
         }
       }
+      console.log(this.dateFormat(systemDate));
     }
 
     render(){
@@ -186,7 +304,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             ariaLabel={desc}
                             firstDayOfWeek={firstDayOfWeek}
                             strings = {this.state.userLanguage == 1036 ? DayPickerFrenchStrings : DayPickerEnglishStrings}
-                            formatDate = {onFormatDate}
+                            //formatDate =  {onFormatDate}
+                            formatDate = {this.dateFormat}
                             parseDateFromString = {onParseDateFromString}
                             onSelectDate = {(selected => {
                               this.setState({

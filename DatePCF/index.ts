@@ -71,6 +71,7 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		this.context = context;
 
 		let userLanguage = context.userSettings.languageId;
+		let userContext = context;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
 		var utcCurrDate = this.getUtcDate(currDate.toDate());
 		var convertedUTCDate = this.convertDate(utcCurrDate);
@@ -82,7 +83,8 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				this._notifyOutputChanged();
-			}
+			},
+			userContext: userContext
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
