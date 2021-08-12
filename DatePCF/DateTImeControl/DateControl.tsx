@@ -1,8 +1,11 @@
 import * as React from 'react';
-import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
+import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, 
+  mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
 import { IInputs } from '../generated/ManifestTypes';
-import { stringify } from 'querystring';
-import { isDate } from 'moment';
+//import { stringify } from 'querystring';
+//import { isDate } from 'moment';
+
+import {TimeBoxCombo} from './TimeBox';
 
 export interface IDate {
   currentDate: Date | undefined;
@@ -96,11 +99,6 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
       maxWidth: '300px',
     },
   });
-  /*
-  const onFormatDate = (date?: Date): string => {
-    return !date ? '' : (getDay(date)) + '/' + (getMonth(date)) + '/' + (date.getFullYear());
-  };
-*/
 
   const onParseDateFromString = (val: string): Date =>{
     const date = new Date(val) || new Date();
@@ -114,26 +112,10 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
     return new Date(year, month, day);
   }
 
-/*
-  const getMonth = (date: Date): string => {
-    var month = date.getMonth() + 1;
-    return month < 10 ? '0' + month : '' + month;
-  }
-
-  const getDay = (date: Date): string => {
-    var day = date.getDate();
-    return day < 10 ? '0' + day : '' + day;
-  }
-  */
-
   
 const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutien est le jour du dash du mois de tiret de l’année.';
 
 const firstDayOfWeek = DayOfWeek.Sunday;
-
-
-
-
 
 export default class DateControl extends React.Component<IDateControlProps, IDateControlState>{
     
@@ -155,7 +137,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var firstPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[0] as string);
       var secondPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[1] as string);
       var thirdPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[2] as string);
-      
+      /*
+      TO REMOVE
       console.log("firstPosition: "+ firstPosition);
       console.log("secondPosition: "+ secondPosition);
       console.log("thirdPosition: "+ thirdPosition);
@@ -163,16 +146,20 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       console.log("User dateFormat: "+ dateFormat);
       console.log("dateSeparator: "+ dateSeparator);
       console.log("splitDateFormat: "+ splitDateFormat);
+      */
       return !date ? '' : firstPosition + dateSeparator + secondPosition + dateSeparator + thirdPosition;
     }
     
     private retrieveDateFormatValue = (date: Date, splitDateFormat: string): string =>{
+      /*
+      TO REMOVE
       console.log("date in retrieveDateFormateValue: "+ date);
       console.log("splitDateFormat in retrieveDateFormateValue: "+ splitDateFormat);
+      */
       var dateString = "";
       if(splitDateFormat != undefined && splitDateFormat != null)
       {
-        console.log("inside first if of SplitDateFormat");
+        //console.log("inside first if of SplitDateFormat"); TO REMOVE
           if(splitDateFormat.toUpperCase().includes("D"))
           dateString = this.getDay(date, splitDateFormat);
         else if(splitDateFormat.toUpperCase().includes("M"))
@@ -283,7 +270,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var day = systemDate.getDate();
       if(isDateAndTime != true) //We are dealing with Date only
       {
-        console.log("Date only");
+        //console.log("Date only"); TO REMOVE
         if(year != null && month != null && day != null)
         {
           this.setDate(new Date(year, month, day));
@@ -304,7 +291,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             ariaLabel={desc}
                             firstDayOfWeek={firstDayOfWeek}
                             strings = {this.state.userLanguage == 1036 ? DayPickerFrenchStrings : DayPickerEnglishStrings}
-                            //formatDate =  {onFormatDate}
                             formatDate = {this.dateFormat}
                             parseDateFromString = {onParseDateFromString}
                             onSelectDate = {(selected => {
@@ -314,6 +300,17 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             })}
                             value={this.state.currentDate }
                         />
+                    </Stack>
+                    <Stack tokens={{childrenGap:10, padding:10}}>
+                      
+                      <TimeBoxCombo/>
+
+{/*
+                        <PrimaryButton 
+                                text={this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date"}
+                                onClick={this.getCurrentDate}
+                            />
+*/}                          
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
                         <PrimaryButton 
