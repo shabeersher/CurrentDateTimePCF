@@ -1,11 +1,12 @@
 import * as React from 'react';
-import {Callout, DatePicker, DayOfWeek, IDatePicker, IDatePickerStrings, 
-  mergeStyleSets, PrimaryButton, Stack, TextField} from 'office-ui-fabric-react';
+import {DatePicker, DayOfWeek, IDatePickerStrings, 
+  mergeStyleSets, PrimaryButton, Stack} from 'office-ui-fabric-react';
 import { IInputs } from '../generated/ManifestTypes';
 //import { stringify } from 'querystring';
 //import { isDate } from 'moment';
+//Import Callout, IDatePicker, TextField from office-ui-fabric-react
 
-import {TimeBoxCombo} from './TimeBox';
+import TimeBoxCombo from './TimeBox';
 
 export interface IDate {
   currentDate: Date | undefined;
@@ -268,12 +269,14 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
       var day = systemDate.getDate();
+      var hour = systemDate.getHours();
+      var minute = systemDate.getMinutes();
       if(isDateAndTime != true) //We are dealing with Date only
       {
         //console.log("Date only"); TO REMOVE
-        if(year != null && month != null && day != null)
+        if(year != null && month != null && day != null && hour != null && minute != null)
         {
-          this.setDate(new Date(year, month, day));
+          this.setDate(new Date(year, month, day, hour, minute));
         }
       }
       console.log(this.dateFormat(systemDate));
@@ -303,8 +306,11 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
                       
-                      <TimeBoxCombo/>
-
+                      {/*<TimeBoxCombo/>*/}
+                      <TimeBoxCombo 
+                        currentTime = {this.state.currentDate}
+                        userContext = {this.state.userContext}
+                      />
 {/*
                         <PrimaryButton 
                                 text={this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date"}

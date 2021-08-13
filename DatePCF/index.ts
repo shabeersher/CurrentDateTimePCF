@@ -73,6 +73,7 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let userLanguage = context.userSettings.languageId;
 		let userContext = context;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
+		console.log("currDate: "+currDate);
 		var utcCurrDate = this.getUtcDate(currDate.toDate());
 		var convertedUTCDate = this.convertDate(utcCurrDate);
 
