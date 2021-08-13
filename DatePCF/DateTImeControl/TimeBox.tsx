@@ -43,8 +43,8 @@ const isPM = true;
 const display12Hours:IComboBoxOption[] = []
 {
   display12Hours.push(
-    { key: '00', text: '12 : 00 AM' },
-    { key: '0030', text: '12 : 30 AM' }
+    { key: '00', text: '12:00 AM' },
+    { key: '0030', text: '12:30 AM' }
   )
 
     for(var hour=1; hour< 12; hour+=1){
@@ -54,15 +54,15 @@ const display12Hours:IComboBoxOption[] = []
             var hourText = hour < 10 ? '0'+hour : hour;
             var uniqueKey = hour+''+interval+'am';
             var intervalText = interval == 0 ? '00' : interval;
-            var time = hourText+' : '+intervalText+' AM';
+            var time = hourText+':'+intervalText+' AM';
             display12Hours.push(
                 {key:uniqueKey, text:time}
             );
         }
     }
     display12Hours.push(
-      { key: '12', text: '12 : 00 PM' },
-      { key: '1230', text: '12 : 30 PM' }
+      { key: '12', text: '12:00 PM' },
+      { key: '1230', text: '12:30 PM' }
     )
     for(var hour=1; hour< 12; hour+=1){
       for(var interval=0; interval<60; interval+=30){
@@ -71,7 +71,7 @@ const display12Hours:IComboBoxOption[] = []
           var hourText = hour < 10 ? '0'+hour : hour;
           var uniqueKey = hour+''+interval+'pm';
           var intervalText = interval == 0 ? '00' : interval;
-          var time = hourText+' : '+intervalText+' PM';
+          var time = hourText+':'+intervalText+' PM';
           display12Hours.push(
               {key:uniqueKey, text:time}
           );
@@ -141,7 +141,7 @@ private getCurrentTime = ():string =>
   var suffix = timeHour  >= 12 ? "PM":"AM";
   var hours = ((timeHour  + 11) % 12 + 1);
   var timeMinute = time?.getMinutes();
-  return hours+' : '+timeMinute + ' ' + suffix;
+  return hours+':'+timeMinute + ' ' + suffix;
 }
   render()
   {
