@@ -113,6 +113,9 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
     return new Date(year, month, day);
   }
 
+  const onlyDate = true;
+
+
   
 const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutien est le jour du dash du mois de tiret de l’année.';
 
@@ -305,12 +308,15 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         />
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
-                      
+                    
                       {/*<TimeBoxCombo/>*/}
-                      <TimeBoxCombo 
-                        currentTime = {this.state.currentDate}
-                        userContext = {this.state.userContext}
-                      />
+                        {onlyDate ?
+                          (<TimeBoxCombo 
+                          currentTime = {this.state.currentDate}
+                          userContext = {this.state.userContext}
+                        />) : null
+                        }
+                        
 {/*
                         <PrimaryButton 
                                 text={this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date"}
