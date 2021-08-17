@@ -14,39 +14,18 @@ import { IDocumentCard } from 'office-ui-fabric-react';
 export interface ITime {
   currentTime: Date | undefined
   userContext: ComponentFramework.Context<IInputs> ;
+  selectedTimeKey?: { key: string | number | undefined };
+  selectedTimeText?: string;
 }
 
 export interface ITimeControlProps extends ITime{
-  //onSelectionChange:(keyValue?:IDropdownOption) => void;
 
 }
 
 interface ITimeControlState extends ITime{
-  selectedItem?: { key: string | number | undefined };
-  operationType?: string;
+
 }
 
-//import { useBoolean } from '@uifabric/react-hooks';
-
-//SelectableOptionMenuItemType, Toggle from @fluentui/react/lib/index
-
-const INITIAL_OPTIONS: IComboBoxOption[] = [
-    /*
-  //{ key: 'Header1', text: 'First heading', itemType: SelectableOptionMenuItemType.Header },
-  { key: 'A', text: 'Option A' },
-  { key: 'B', text: 'Option B' },
-  { key: 'C', text: 'Option C' },
-  { key: 'D', text: 'Option D' },
-  //{ key: 'divider', text: '-', itemType: SelectableOptionMenuItemType.Divider },
-//{ key: 'Header2', text: 'Second heading', itemType: SelectableOptionMenuItemType.Header },
-  { key: 'E', text: 'Option E' },
- // { key: 'F', text: 'Option F', disabled: true },
-  { key: 'G', text: 'Option G' },
-  { key: 'H', text: 'Option H' },
-  { key: 'I', text: 'Option I' },
-  { key: 'J', text: 'Option J' },
-  */
-];
 const is24Hours= false;
 const isAM = false;
 const isPM = true;
@@ -121,20 +100,18 @@ export default class TimeBoxCombo extends React.Component<ITimeControlProps, ITi
     this.state = {
         currentTime : props.currentTime,
         userContext: props.userContext,
-        operationType: '',
-        selectedItem: undefined,
+        selectedTimeText: props.selectedTimeText,
+        selectedTimeKey: undefined,
     };
+    console.log("State Time: "+ this.state.selectedTimeText);
 
 }
-
-private onSelectionChange = () =>{
-
-}
-
+/*
 private getCurrentTime = ():string =>
 {
   console.log("Props current time: "+ this.props.currentTime);
   var time = this.props.currentTime;
+  */
   /*
   const offsetMinutes = (time?.getTimezoneOffset() as number)
   var newTimeDate = new Date(time?.getTime() as number + offsetMinutes * 60000);
@@ -154,6 +131,7 @@ console.log("TimeZone getTime(): "+time?.getTime());
 time?.setDate(time?.getTime() + offsetTimeZone)
 console.log("Time after TimeZone: "+time);
 */
+/*
   var timeHour = time?.getHours() as number;
   console.log("TimeHour in time: "+ timeHour);
   var suffix = timeHour  >= 12 ? "PM":"AM";
@@ -165,74 +143,61 @@ console.log("Time after TimeZone: "+time);
   return timeHour+':'+timeMinute + ' ' + suffix;
 }
 
+private getCurrentTime = () =>{
+  console.log("Props current time: "+ this.props.currentTime);
+  var time = this.props.currentTime;
+  var timeHour = time?.getHours() as number;
+  console.log("TimeHour in time: "+ timeHour);
+  var suffix = timeHour  >= 12 ? "PM":"AM";
+  var hours = ((timeHour  + 11) % 12 + 1);
+  var timeMinute = time?.getMinutes();
+  console.log("Hours in time: "+ timeHour);
+
+  console.log("Minutes in time: "+ timeMinute);
+  this.setState({
+    selectedTimeText: timeHour+':'+timeMinute + ' ' + suffix
+  });
+  //return timeHour+':'+timeMinute + ' ' + suffix;
+}
+*/
   render()
   {
-    /*
-    const [selectedKey, setSelectedKey] = React.useState<string | number | undefined>('C');
-
-    const onChange = React.useCallback(
-      (ev: React.FormEvent<IComboBox>, option?: IComboBoxOption): void => {
-        setSelectedKey(option?.key);
-      },
-      [setSelectedKey],
-    );
-*/
-
-
     const allowFreeform = true;
-    const autoComplete = true;
+    //const autoComplete = true;  TO REMOVE
     return (
       <Fabric className={wrapperClassName}>
         <ComboBox
-          key={'' + autoComplete + allowFreeform}
           allowFreeform={allowFreeform}
-          autoComplete={autoComplete ? 'on' : 'off'}
-          //selectedKey = {selectedKey}
-          //options={INITIAL_OPTIONS}
+          //key={'' + autoComplete + allowFreeform} TO REMOVE
           options = {display12Hours}//{is24Hours == false ? display12Hours : display24Hours}
           buttonIconProps={{iconName:"Clock"}}
-          //text={this.getCurrentTime()}
+          text={this.state.selectedTimeText}
           defaultSelectedKey = "0030"
-          onItemClick = {(selected => {
-            console.log("Selected Item: "+ selected);
-          })}
-
-          selectedKey={this.state.selectedItem ? this.state.selectedItem.key : undefined}
+          selectedKey={this.state.selectedTimeKey ? this.state.selectedTimeKey.key : undefined}
           onChange={this._onChange}
-          //onChange={onChange}
-          /*
-          onChange = {(selected => {
-            this.setState({
-              currentState: selected ?? undefined
-            }, this.onSelectionChange))
-            console.log("selected: "+ selected)
-          })}
-          */
-/*          
-          onChange = {(selected => {
-            console.log("Selected:" + se)
-          })}
-  
-
-          onSelectDate = {(selected => {
-            this.setState({
-              currentDate: selected ?? undefined                                
-            },this.onDateChanged)
-          })}
-*/
         />
       </Fabric>
     );
 
     
   }
-  private _onChange: IComboBoxProps['onChange'] = (event, option) => {
+  private _onChange: IComboBoxProps['onChange'] = (event, option, index, value) => {
     console.log("Option is: "+ option?.text);
-    console.log("Option Index: "+ option?.key);
-    this.setState({ selectedItem: option });
-    this.setState({operationType: option?.text});
+    console.log("Option Key: "+ option?.key);
+    console.log("Option Value: "+ value);
+    if(option != null)
+    {
+      console.log("option is not null")
+      this.setState({ selectedTimeKey: option });
+      this.setState({selectedTimeText: option?.text});
+    }
+    else
+    {
+      console.log("option is null");
+      this.setState({ selectedTimeKey: undefined });
+      this.setState({selectedTimeText: value});
+    }
     (event);
-
   }
 }
 

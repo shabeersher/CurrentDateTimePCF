@@ -261,16 +261,24 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var hour = systemDate.getHours();
       var minute = systemDate.getMinutes();
 
-      //hour += timeZone;
-      //if(isDateAndTime != true) //We are dealing with Date only
-      //{
-        //console.log("Date only"); TO REMOVE
-        if(year != null && month != null && day != null && hour != null && minute != null)
-        {
-          this.setDate(new Date(year, month, day, hour, minute));
-        }
-      //}
-      //console.log(this.dateFormat(systemDate));
+      if(year != null && month != null && day != null && hour != null && minute != null)
+      {
+        this.setDate(new Date(year, month, day, hour, minute));
+      }
+    }
+
+    private getTimeFromDate = () =>{
+      var currentDateTime = this.state.currentDate;
+
+      var timeHour = currentDateTime?.getHours() as number;
+      console.log("TimeHour in time: "+ timeHour);
+      var suffix = timeHour  >= 12 ? "PM":"AM";
+      var hours = ((timeHour  + 11) % 12 + 1);
+      var timeMinute = currentDateTime?.getMinutes();
+      console.log("Hours in time: "+ timeHour);
+    
+      console.log("Minutes in time: "+ timeMinute);
+      return timeHour+':'+timeMinute + ' ' + suffix;
     }
 
     render(){
@@ -302,16 +310,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                           (<TimeBoxCombo 
                           currentTime = {this.state.currentDate}
                           userContext = {this.state.userContext}
-                          
+                          selectedTimeText = {this.getTimeFromDate()}
                         />) : null
-                        }
-                        
-{/*
-                        <PrimaryButton 
-                                text={this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date"}
-                                onClick={this.getCurrentDate}
-                            />
-*/}                          
+                        }                         
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
                         <PrimaryButton 
