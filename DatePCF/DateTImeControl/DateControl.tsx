@@ -113,9 +113,6 @@ const DayPickerEnglishStrings: IDatePickerStrings = {
     return new Date(year, month, day);
   }
 
-  const onlyDate = true;
-
-
   
 const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutien est le jour du dash du mois de tiret de l’année.';
 
@@ -141,25 +138,10 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var firstPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[0] as string);
       var secondPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[1] as string);
       var thirdPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[2] as string);
-      /*
-      TO REMOVE
-      console.log("firstPosition: "+ firstPosition);
-      console.log("secondPosition: "+ secondPosition);
-      console.log("thirdPosition: "+ thirdPosition);
-
-      console.log("User dateFormat: "+ dateFormat);
-      console.log("dateSeparator: "+ dateSeparator);
-      console.log("splitDateFormat: "+ splitDateFormat);
-      */
       return !date ? '' : firstPosition + dateSeparator + secondPosition + dateSeparator + thirdPosition;
     }
     
     private retrieveDateFormatValue = (date: Date, splitDateFormat: string): string =>{
-      /*
-      TO REMOVE
-      console.log("date in retrieveDateFormateValue: "+ date);
-      console.log("splitDateFormat in retrieveDateFormateValue: "+ splitDateFormat);
-      */
       var dateString = "";
       if(splitDateFormat != undefined && splitDateFormat != null)
       {
@@ -269,20 +251,26 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       //If IsDateOnly is equal to False, then we know we are dealing with DateAndTime and set isDateAndTime to true otherwise it's Date
       var isDateAndTime = this.state.isDateOnly === false ? true : false;
       var systemDate = new Date();
+      //var timeZone = systemDate.getTimezoneOffset();
+      //console.log("Timezone offset: "+ timeZone);
+      //systemDate.setTime(systemDate.getTime() + timeZone);
+      //console.log("After timezone offset: "+ systemDate);
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
       var day = systemDate.getDate();
       var hour = systemDate.getHours();
       var minute = systemDate.getMinutes();
-      if(isDateAndTime != true) //We are dealing with Date only
-      {
+
+      //hour += timeZone;
+      //if(isDateAndTime != true) //We are dealing with Date only
+      //{
         //console.log("Date only"); TO REMOVE
         if(year != null && month != null && day != null && hour != null && minute != null)
         {
           this.setDate(new Date(year, month, day, hour, minute));
         }
-      }
-      console.log(this.dateFormat(systemDate));
+      //}
+      //console.log(this.dateFormat(systemDate));
     }
 
     render(){
@@ -310,10 +298,11 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                     <Stack tokens={{childrenGap:10, padding:10}}>
                     
                       {/*<TimeBoxCombo/>*/}
-                        {onlyDate ?
+                        {this.props.isDateOnly == false ?
                           (<TimeBoxCombo 
                           currentTime = {this.state.currentDate}
                           userContext = {this.state.userContext}
+                          
                         />) : null
                         }
                         

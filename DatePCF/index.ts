@@ -49,11 +49,13 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 	private convertDate(value:Date)
 	{
 		const offsetMinutes = this.context.userSettings.getTimeZoneOffsetMinutes(value);
+		console.log("OffsetMinutes: "+ offsetMinutes);
 		const localDate = this.addMinutes(value, offsetMinutes);
 		return this.getUtcDate(localDate);
 	}
 
 	private getUtcDate(localDate: Date) {
+		console.log("UTC Hours: "+ localDate.getUTCHours());
 		return  new  Date(
 			localDate.getUTCFullYear(),
 			localDate.getUTCMonth(),
@@ -73,10 +75,10 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let userLanguage = context.userSettings.languageId;
 		let userContext = context;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
-		console.log("currDate: "+currDate);
 		var utcCurrDate = this.getUtcDate(currDate.toDate());
+		console.log("UtcCurrDate: "+ utcCurrDate);
 		var convertedUTCDate = this.convertDate(utcCurrDate);
-
+		console.log("Converted UTC Date: "+ convertedUTCDate);
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
 			currentDate: context.parameters.CurrentDate.raw != null ? convertedUTCDate : undefined,

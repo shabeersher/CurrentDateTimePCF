@@ -4,6 +4,7 @@
     <!-- property node identifies a specific, configurable piece of data that the control expects from CDS -->
     <type-group name="datetime">
       <type>DateAndTime.DateOnly</type>
+      <type>DateAndTime.DateAndTime</type>
     </type-group>
     <property name="CurrentDate" display-name-key="CurrentDate" description-key="Current Date field" of-type-group="datetime" usage="bound" required="true" />
 
