@@ -7,12 +7,14 @@ import { IInputs } from '../generated/ManifestTypes';
 //Import Callout, IDatePicker, TextField from office-ui-fabric-react
 
 import TimeBoxCombo from './TimeBox';
+import { useState } from 'react';
 
 export interface IDate {
   currentDate: Date | undefined;
   isDateOnly: boolean;
   userLanguage: number;
   userContext: ComponentFramework.Context<IInputs> ;
+  isButtonClicked:string;
 }
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
@@ -118,6 +120,7 @@ const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutie
 
 const firstDayOfWeek = DayOfWeek.Sunday;
 
+
 export default class DateControl extends React.Component<IDateControlProps, IDateControlState>{
     
     constructor(props:IDateControlProps){
@@ -126,9 +129,15 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             currentDate : props.currentDate,
             isDateOnly: props.isDateOnly,
             userLanguage: props.userLanguage,
-            userContext: props.userContext
+            userContext: props.userContext,
+            isButtonClicked: props.isButtonClicked
         };
+        
     }
+
+    changeState = () =>{
+      this.setState({isButtonClicked:"true"})
+    };
 
     private dateFormat = (date?:Date): string =>{
       var dateFormat = this.state.userContext.userSettings.dateFormattingInfo.shortDatePattern;
@@ -232,8 +241,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
     private setDate = (date:Date) =>{
       console.log(date);
       this.setState({
-        currentDate: date
-      }, this.onDateChanged)
+        currentDate: date,
+        isButtonClicked: "true"
+      }, this.onDateChanged);
     }
 
     private onDateChanged = () =>{
@@ -241,20 +251,18 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         currentDate:this.state.currentDate,
         isDateOnly:this.state.isDateOnly,
         userLanguage:this.state.userLanguage,
-        userContext: this.state.userContext
+        userContext: this.state.userContext,
+        isButtonClicked: this.state.isButtonClicked
       };
       this.props.onDateChanged(date);
       
     }
 
+
     private getCurrentDate = () =>{
       //If IsDateOnly is equal to False, then we know we are dealing with DateAndTime and set isDateAndTime to true otherwise it's Date
       var isDateAndTime = this.state.isDateOnly === false ? true : false;
       var systemDate = new Date();
-      //var timeZone = systemDate.getTimezoneOffset();
-      //console.log("Timezone offset: "+ timeZone);
-      //systemDate.setTime(systemDate.getTime() + timeZone);
-      //console.log("After timezone offset: "+ systemDate);
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
       var day = systemDate.getDate();
@@ -263,9 +271,20 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
 
       if(year != null && month != null && day != null && hour != null && minute != null)
       {
+        /*
+        this.setState({
+          isButtonClicked: "true"
+        },() =>{
+          console.log("Button has been clicked: "+this.state.isButtonClicked)
+        })
+        */
         this.setDate(new Date(year, month, day, hour, minute));
+
+
       }
+      //console.log("ButtonClicked in DateControl: "+this.state.isButtonClicked);
     }
+    
 
     private getTimeFromDate = () =>{
       var currentDateTime = this.state.currentDate;
@@ -274,13 +293,15 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       console.log("TimeHour in time: "+ timeHour);
       var suffix = timeHour  >= 12 ? "PM":"AM";
       var hours = ((timeHour  + 11) % 12 + 1);
-      var timeMinute = currentDateTime?.getMinutes();
-      console.log("Hours in time: "+ timeHour);
+      var getHour = hours < 10 ? '0' +hours : hours;
+      var timeMinute = currentDateTime?.getMinutes() as number < 10 ? '0'+currentDateTime?.getMinutes() : currentDateTime?.getMinutes();
+      console.log("Hours in time: "+ getHour);
     
       console.log("Minutes in time: "+ timeMinute);
-      return timeHour+':'+timeMinute + ' ' + suffix;
+      return getHour+':'+timeMinute + ' ' + suffix;
     }
 
+    
     render(){
         return(
             <div>
@@ -310,7 +331,13 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                           (<TimeBoxCombo 
                           currentTime = {this.state.currentDate}
                           userContext = {this.state.userContext}
+                          //isButtonClicked = {this.state.isButtonClicked}
                           selectedTimeText = {this.getTimeFromDate()}
+                          onChange = {(test => {
+                            this.setState({
+                              isButtonClicked: 'This is a test'
+                            })
+                          })}
                         />) : null
                         }                         
                     </Stack>

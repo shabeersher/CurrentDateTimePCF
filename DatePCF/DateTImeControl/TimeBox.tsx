@@ -16,10 +16,12 @@ export interface ITime {
   userContext: ComponentFramework.Context<IInputs> ;
   selectedTimeKey?: { key: string | number | undefined };
   selectedTimeText?: string;
+  isButtonClicked?:string;
+
 }
 
 export interface ITimeControlProps extends ITime{
-
+  onChange:(value:string) => void;
 }
 
 interface ITimeControlState extends ITime{
@@ -93,19 +95,44 @@ const wrapperClassName = mergeStyles({
   },
 });
 
+var timeText = "SOmething";
+
 
 export default class TimeBoxCombo extends React.Component<ITimeControlProps, ITimeControlState>{
+
   constructor(props:ITimeControlProps){
     super(props);
     this.state = {
         currentTime : props.currentTime,
         userContext: props.userContext,
         selectedTimeText: props.selectedTimeText,
-        selectedTimeKey: undefined,
+        selectedTimeKey: props.selectedTimeKey,
+        isButtonClicked: props.isButtonClicked
     };
-    console.log("State Time: "+ this.state.selectedTimeText);
-
+    /*
+    if(this.props.isButtonClicked != this.state.isButtonClicked)
+    {
+      console.log("Props and state are not equal:\nProps:=>"+this.props.isButtonClicked+"\nState:=>"+this.state.isButtonClicked);
+      this.setState({
+        isButtonClicked : this.props.isButtonClicked
+      },() => {
+        console.log("IsButtonClicked state is updated: "+ this.state.isButtonClicked);
+      })
+    }
+    */
 }
+/*
+callBack = (dataFromChild: string) =>{
+  this.setState({
+    isButtonClicked: dataFromChild
+  })
+}
+*/
+componentDidUpdate(prevProps: ITimeControlProps, prevState: ITimeControlState):void {
+  console.warn("componentDidUpdate method called", prevProps.isButtonClicked, this.props.isButtonClicked);
+}
+
+
 /*
 private getCurrentTime = ():string =>
 {
@@ -142,7 +169,7 @@ console.log("Time after TimeZone: "+time);
   console.log("Minutes in time: "+ timeMinute);
   return timeHour+':'+timeMinute + ' ' + suffix;
 }
-
+*/
 private getCurrentTime = () =>{
   console.log("Props current time: "+ this.props.currentTime);
   var time = this.props.currentTime;
@@ -154,15 +181,26 @@ private getCurrentTime = () =>{
   console.log("Hours in time: "+ timeHour);
 
   console.log("Minutes in time: "+ timeMinute);
-  this.setState({
-    selectedTimeText: timeHour+':'+timeMinute + ' ' + suffix
-  });
-  //return timeHour+':'+timeMinute + ' ' + suffix;
+  
+  return timeHour+':'+timeMinute + ' ' + suffix;
 }
-*/
+
+
   render()
   {
     const allowFreeform = true;
+    //console.log("state of everything");
+    //console.log(this);
+    //console.log("Button Props is: "+ this.props.isButtonClicked)
+    //console.log("Inside Render but outside If: "+ this.state.isButtonClicked);
+    /*
+    this.setState({
+      isButtonClicked: this.props.isButtonClicked
+    },() =>{
+      console.log("Is Button is to: "+this.state.isButtonClicked);
+    })
+     */
+     
     //const autoComplete = true;  TO REMOVE
     return (
       <Fabric className={wrapperClassName}>
@@ -171,9 +209,11 @@ private getCurrentTime = () =>{
           //key={'' + autoComplete + allowFreeform} TO REMOVE
           options = {display12Hours}//{is24Hours == false ? display12Hours : display24Hours}
           buttonIconProps={{iconName:"Clock"}}
-          text={this.state.selectedTimeText}
-          defaultSelectedKey = "0030"
-          selectedKey={this.state.selectedTimeKey ? this.state.selectedTimeKey.key : undefined}
+          //text={timeText}
+         text = {this.state.selectedTimeText} 
+         //text = {this.getCurrentTime()}
+         defaultSelectedKey = "0030"
+          //selectedKey={this.state.selectedTimeKey ? this.state.selectedTimeKey.key : undefined}
           onChange={this._onChange}
         />
       </Fabric>
@@ -181,21 +221,40 @@ private getCurrentTime = () =>{
 
     
   }
-  private _onChange: IComboBoxProps['onChange'] = (event, option, index, value) => {
-    console.log("Option is: "+ option?.text);
-    console.log("Option Key: "+ option?.key);
-    console.log("Option Value: "+ value);
+
+  private displayTime = (): string =>{
+    console.log("Inside display Time: "+ this.state.selectedTimeText);
+    //this.getCurrentTime();
+    /*
+    if(this.state.selectedTimeText != null)
+      return this.state.selectedTimeText;
+      */
+    return "Test";
+    
+  }
+  
+  private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
+
     if(option != null)
     {
       console.log("option is not null")
+      console.log("Option is: "+ option?.text);
       this.setState({ selectedTimeKey: option });
-      this.setState({selectedTimeText: option?.text});
+      this.setState({selectedTimeText: option?.text},
+        () =>{
+          console.log("SelectedTimeTex has changed:" +this.state.selectedTimeText)
+        }
+        );
     }
     else
     {
       console.log("option is null");
+      console.log("Option is: "+ value);
       this.setState({ selectedTimeKey: undefined });
-      this.setState({selectedTimeText: value});
+      this.setState({selectedTimeText: value},
+        () =>{
+          console.log("SelectedTimeTex has changed:" +this.state.selectedTimeText)
+        });
     }
     (event);
   }

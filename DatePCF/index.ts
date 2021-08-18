@@ -87,7 +87,8 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 				this.currentDate = d;
 				this._notifyOutputChanged();
 			},
-			userContext: userContext
+			userContext: userContext,
+			isButtonClicked: "false"
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
