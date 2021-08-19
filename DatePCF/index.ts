@@ -73,11 +73,12 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		var getHour = hours < 10 ? '0' +hours : hours;
 		var timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
 		
-		console.log("Hours in time: "+ timeHour);
+		console.log("Hours in time: "+ hours);
+		console.log("getHours: "+getHour);
 	  
 		console.log("Minutes in time: "+ timeMinute);
 		
-		return timeHour+':'+timeMinute + ' ' + suffix;
+		return getHour+':'+timeMinute + ' ' + suffix;
 	  }
 
 	addMinutes(date: Date, minutes: number): Date {
