@@ -1,13 +1,14 @@
 import * as React from 'react';
-import {DatePicker, DayOfWeek, IDatePickerStrings, 
+import {ComboBox, DatePicker, DayOfWeek, IComboBoxOption, IComboBoxProps, IDatePickerStrings, 
+  mergeStyles, 
   mergeStyleSets, PrimaryButton, Stack} from 'office-ui-fabric-react';
 import { IInputs } from '../generated/ManifestTypes';
 //import { stringify } from 'querystring';
 //import { isDate } from 'moment';
 //Import Callout, IDatePicker, TextField from office-ui-fabric-react
 
-import TimeBoxCombo from './TimeBox';
-import { useState } from 'react';
+//import TimeBoxCombo from './TimeBox';
+//import { useState } from 'react';
 
 export interface IDate {
   currentDate: Date | undefined;
@@ -15,6 +16,8 @@ export interface IDate {
   userLanguage: number;
   userContext: ComponentFramework.Context<IInputs> ;
   isButtonClicked:string;
+  selectedTimeKey?: { key: string | number | undefined };
+  selectedTimeText?: string;
 }
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
@@ -120,6 +123,69 @@ const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutie
 
 const firstDayOfWeek = DayOfWeek.Sunday;
 
+const display12Hours:IComboBoxOption[] = []
+{
+  display12Hours.push(
+    { key: '00', text: '12:00 AM' },
+    { key: '0030', text: '12:30 AM' }
+  )
+
+    for(var hour=1; hour< 12; hour+=1){
+        for(var interval=0; interval<60; interval+=30){
+            if(interval > 30)
+                continue;
+            var hourText = hour < 10 ? '0'+hour : hour;
+            var uniqueKey = hour+''+interval+'am';
+            var intervalText = interval == 0 ? '00' : interval;
+            var time = hourText+':'+intervalText+' AM';
+            display12Hours.push(
+                {key:uniqueKey, text:time}
+            );
+        }
+    }
+    display12Hours.push(
+      { key: '12', text: '12:00 PM' },
+      { key: '1230', text: '12:30 PM' }
+    )
+    for(var hour=1; hour< 12; hour+=1){
+      for(var interval=0; interval<60; interval+=30){
+          if(interval > 30)
+              continue;
+          var hourText = hour < 10 ? '0'+hour : hour;
+          var uniqueKey = hour+''+interval+'pm';
+          var intervalText = interval == 0 ? '00' : interval;
+          var time = hourText+':'+intervalText+' PM';
+          display12Hours.push(
+              {key:uniqueKey, text:time}
+          );
+      }
+  }
+}
+const display24Hours:IComboBoxOption[] = []
+{
+    for(var hour=0; hour<= 23; hour+=1){
+        for(var interval=0; interval<60; interval+=30){
+            if(interval > 30)
+                continue;
+            var hourText = hour < 10 ? '0'+hour : hour;
+            var uniqueKey = hour+''+interval;
+            var intervalText = interval == 0 ? '00' : interval;
+            var time = hourText+' : '+intervalText;
+            display24Hours.push(
+                {key:uniqueKey, text:time}
+            );
+        }
+    }
+}
+
+const wrapperClassName = mergeStyles({
+  display: 'flex',
+  selectors: {
+    '& > *': { marginRight: '20px' },
+    '& .ms-ComboBox': { maxWidth: '300px' },
+  },
+});
+
 
 export default class DateControl extends React.Component<IDateControlProps, IDateControlState>{
     
@@ -130,7 +196,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             isDateOnly: props.isDateOnly,
             userLanguage: props.userLanguage,
             userContext: props.userContext,
-            isButtonClicked: props.isButtonClicked
+            isButtonClicked: props.isButtonClicked,
+            selectedTimeKey: props.selectedTimeKey,
+            selectedTimeText: props.selectedTimeText
         };
         
     }
@@ -238,11 +306,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       return formattedDateYear != "" ? formattedDateYear : fullYear + "";
     }
 
-    private setDate = (date:Date) =>{
+    private setDate = (date:Date, value:string) =>{
       console.log(date);
       this.setState({
         currentDate: date,
-        isButtonClicked: "true"
+        isButtonClicked: "true",
+        selectedTimeText: value
       }, this.onDateChanged);
     }
 
@@ -252,7 +321,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         isDateOnly:this.state.isDateOnly,
         userLanguage:this.state.userLanguage,
         userContext: this.state.userContext,
-        isButtonClicked: this.state.isButtonClicked
+        isButtonClicked: this.state.isButtonClicked,
+        selectedTimeKey: this.state.selectedTimeKey,
+        selectedTimeText: this.state.selectedTimeText
       };
       this.props.onDateChanged(date);
       
@@ -278,7 +349,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
           console.log("Button has been clicked: "+this.state.isButtonClicked)
         })
         */
-        this.setDate(new Date(year, month, day, hour, minute));
+        this.setDate(new Date(year, month, day, hour, minute), 
+            this.getTimeFromDate(new Date(year, month, day, hour, minute)));
 
 
       }
@@ -286,23 +358,63 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
     }
     
 
-    private getTimeFromDate = () =>{
-      var currentDateTime = this.state.currentDate;
-
+    private getTimeFromDate = (dateTime: Date) =>{
+      //var currentDateTime = this.state.currentDate;
+      var currentDateTime = dateTime;
       var timeHour = currentDateTime?.getHours() as number;
-      console.log("TimeHour in time: "+ timeHour);
+      //console.log("TimeHour in time: "+ timeHour);
       var suffix = timeHour  >= 12 ? "PM":"AM";
       var hours = ((timeHour  + 11) % 12 + 1);
       var getHour = hours < 10 ? '0' +hours : hours;
       var timeMinute = currentDateTime?.getMinutes() as number < 10 ? '0'+currentDateTime?.getMinutes() : currentDateTime?.getMinutes();
-      console.log("Hours in time: "+ getHour);
+      //console.log("Hours in time: "+ getHour);
     
-      console.log("Minutes in time: "+ timeMinute);
+      //console.log("Minutes in time: "+ timeMinute);
       return getHour+':'+timeMinute + ' ' + suffix;
     }
 
+    private getHourMinuteFromText(value:string)
+    {
+      console.log("The value is: "+ value);
+      var hourMinute = value.split(':');
+      var hour = Number.parseInt(hourMinute[0]);
+      var minute = Number.parseInt(hourMinute[1]);
+      console.log("hourMinute: "+hourMinute);
+      console.log("hour: "+hour);
+      console.log("minute: "+minute);
+      console.log("amPM: "+ value.split(' ')[1]);
+      var combinedTime = [hour, minute, value.split(' ')[1]];
+      console.log('CombinedTime: '+ combinedTime);
+      return combinedTime;
+    }
+
+    private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
+
+      var systemDate = new Date();
+      var year = systemDate.getFullYear();
+      var month = systemDate.getMonth();
+      var day = systemDate.getDate();
+      var hour = systemDate.getHours();
+      var minute = systemDate.getMinutes();
+    
+      var stateCurrentDate = this.state.currentDate as Date;
+      if(option != null)
+      {
+        var hourMinute = this.getHourMinuteFromText(option?.text as string);
+        this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), option?.text as string);
+      }
+      else
+      {
+        var hourMinute = this.getHourMinuteFromText(value as string);
+        this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), value as string);
+      }
+      (event);
+    }
+    
+
     
     render(){
+      const allowFreeform = true;
         return(
             <div>
                 <Stack horizontal> 
@@ -325,9 +437,22 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         />
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
-                    
+                      {this.props.isDateOnly == false ? (
+                      <ComboBox 
+                        allowFreeform={allowFreeform}
+                        buttonIconProps={{iconName:"Clock"}}
+                        options = {display12Hours}
+                        //defaultSelectedKey = "0030"
+                      //text={timeText}
+                        text = {this.state.selectedTimeText} 
+                        onChange={this._onChange}
+                       />
+                      ): null}
+
                       {/*<TimeBoxCombo/>*/}
-                        {this.props.isDateOnly == false ?
+                      
+                        {/*
+                        this.props.isDateOnly == false ?
                           (<TimeBoxCombo 
                           currentTime = {this.state.currentDate}
                           userContext = {this.state.userContext}
@@ -339,7 +464,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             })
                           })}
                         />) : null
-                        }                         
+                        */}                         
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
                         <PrimaryButton 

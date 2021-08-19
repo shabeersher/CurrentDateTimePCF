@@ -170,20 +170,6 @@ console.log("Time after TimeZone: "+time);
   return timeHour+':'+timeMinute + ' ' + suffix;
 }
 */
-private getCurrentTime = () =>{
-  console.log("Props current time: "+ this.props.currentTime);
-  var time = this.props.currentTime;
-  var timeHour = time?.getHours() as number;
-  console.log("TimeHour in time: "+ timeHour);
-  var suffix = timeHour  >= 12 ? "PM":"AM";
-  var hours = ((timeHour  + 11) % 12 + 1);
-  var timeMinute = time?.getMinutes();
-  console.log("Hours in time: "+ timeHour);
-
-  console.log("Minutes in time: "+ timeMinute);
-  
-  return timeHour+':'+timeMinute + ' ' + suffix;
-}
 
 
   render()
