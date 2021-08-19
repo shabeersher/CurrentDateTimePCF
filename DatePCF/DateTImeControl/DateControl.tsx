@@ -15,7 +15,6 @@ export interface IDate {
   isDateOnly: boolean;
   userLanguage: number;
   userContext: ComponentFramework.Context<IInputs> ;
-  isButtonClicked:string;
   selectedTimeKey?: { key: string | number | undefined };
   selectedTimeText?: string;
 }
@@ -196,16 +195,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             isDateOnly: props.isDateOnly,
             userLanguage: props.userLanguage,
             userContext: props.userContext,
-            isButtonClicked: props.isButtonClicked,
             selectedTimeKey: props.selectedTimeKey,
             selectedTimeText: props.selectedTimeText
         };
         
     }
 
-    changeState = () =>{
-      this.setState({isButtonClicked:"true"})
-    };
 
     private dateFormat = (date?:Date): string =>{
       var dateFormat = this.state.userContext.userSettings.dateFormattingInfo.shortDatePattern;
@@ -310,7 +305,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       console.log(date);
       this.setState({
         currentDate: date,
-        isButtonClicked: "true",
         selectedTimeText: value
       }, this.onDateChanged);
     }
@@ -321,7 +315,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         isDateOnly:this.state.isDateOnly,
         userLanguage:this.state.userLanguage,
         userContext: this.state.userContext,
-        isButtonClicked: this.state.isButtonClicked,
         selectedTimeKey: this.state.selectedTimeKey,
         selectedTimeText: this.state.selectedTimeText
       };
@@ -342,19 +335,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
 
       if(year != null && month != null && day != null && hour != null && minute != null)
       {
-        /*
-        this.setState({
-          isButtonClicked: "true"
-        },() =>{
-          console.log("Button has been clicked: "+this.state.isButtonClicked)
-        })
-        */
         this.setDate(new Date(year, month, day, hour, minute), 
             this.getTimeFromDate(new Date(year, month, day, hour, minute)));
-
-
       }
-      //console.log("ButtonClicked in DateControl: "+this.state.isButtonClicked);
     }
     
 
@@ -373,20 +356,33 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       return getHour+':'+timeMinute + ' ' + suffix;
     }
 
+    private convertTimeToMilitaryTime = (time12h:string) =>{
+      const [time, modifier] = time12h.split(' ');
+
+      let [hours, minutes] = time.split(':');
+    
+      if (hours === '12') {
+        hours = '00';
+      }
+    
+      if (modifier === 'PM') {
+        hours = parseInt(hours, 10) + 12 +'';
+      }
+      return [hours, minutes];
+    }
+
     private getHourMinuteFromText(value:string)
     {
       console.log("The value is: "+ value);
       var hourMinute = value.split(':');
       var hour = Number.parseInt(hourMinute[0]);
       var minute = Number.parseInt(hourMinute[1]);
-      console.log("hourMinute: "+hourMinute);
-      console.log("hour: "+hour);
-      console.log("minute: "+minute);
-      console.log("amPM: "+ value.split(' ')[1]);
+
       var combinedTime = [hour, minute, value.split(' ')[1]];
       console.log('CombinedTime: '+ combinedTime);
       return combinedTime;
     }
+
 
     private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
 
@@ -396,20 +392,44 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var day = systemDate.getDate();
       var hour = systemDate.getHours();
       var minute = systemDate.getMinutes();
-    
+      var getAMPM = "";
       var stateCurrentDate = this.state.currentDate as Date;
       if(option != null)
       {
-        var hourMinute = this.getHourMinuteFromText(option?.text as string);
-        this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), option?.text as string);
-      }
+        
+        getAMPM = option?.text.split(' ')[0].toUpperCase();
+        if(getAMPM == "AM" )
+        {
+          var hourMinute = this.getHourMinuteFromText(option?.text as string);
+          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), option?.text as string);
+   
+        }
+        else if(getAMPM == "PM")
+        {
+          var militaryTime = this.convertTimeToMilitaryTime(option?.text as string);
+          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), option?.text as string);
+ 
+        }
+      } 
       else
       {
-        var hourMinute = this.getHourMinuteFromText(value as string);
-        this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), value as string);
+        getAMPM = value?.split(' ')[0].toUpperCase() as string;
+        if(getAMPM == "AM")
+        {
+          var hourMinute = this.getHourMinuteFromText(value as string);
+          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), value as string);
+        }
+        else if(getAMPM == "PM")
+        {
+          var militaryTime = this.convertTimeToMilitaryTime(value as string);
+          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), value as string);
+ 
+        }
+
       }
       (event);
     }
+  
     
 
     
@@ -430,7 +450,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             parseDateFromString = {onParseDateFromString}
                             onSelectDate = {(selected => {
                               this.setState({
-                                currentDate: selected ?? undefined                                
+                                currentDate: selected ?? undefined,                             
                               },this.onDateChanged)
                             })}
                             value={this.state.currentDate }
@@ -447,24 +467,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         text = {this.state.selectedTimeText} 
                         onChange={this._onChange}
                        />
-                      ): null}
-
-                      {/*<TimeBoxCombo/>*/}
-                      
-                        {/*
-                        this.props.isDateOnly == false ?
-                          (<TimeBoxCombo 
-                          currentTime = {this.state.currentDate}
-                          userContext = {this.state.userContext}
-                          //isButtonClicked = {this.state.isButtonClicked}
-                          selectedTimeText = {this.getTimeFromDate()}
-                          onChange = {(test => {
-                            this.setState({
-                              isButtonClicked: 'This is a test'
-                            })
-                          })}
-                        />) : null
-                        */}                         
+                      ): null}                       
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
                         <PrimaryButton 
@@ -476,5 +479,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                 
             </div>
         )
+                      
+        
     }
 }

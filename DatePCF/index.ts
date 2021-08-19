@@ -46,44 +46,14 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		// Add code to update control view
 	}
 	
-	private convertDate(value:Date)
-	{
-		const offsetMinutes = this.context.userSettings.getTimeZoneOffsetMinutes(value);
-		//console.log("OffsetMinutes: "+ offsetMinutes);
-		const localDate = this.addMinutes(value, offsetMinutes);
-		return this.getUtcDate(localDate);
-	}
-
-	private getUtcDate(localDate: Date) {
-		//console.log("UTC Hours: "+ localDate.getUTCHours());
-		return  new  Date(
-			localDate.getUTCFullYear(),
-			localDate.getUTCMonth(),
-			localDate.getUTCDate(),
-			localDate.getUTCHours(),
-			localDate.getUTCMinutes(),
-		);
-	}
 	private getCurrentTime = (localDate: Date) =>{
-		//console.log("Props current time: "+ this.props.currentTime);
 		var timeHour = localDate?.getHours();
-		console.log("TimeHour in time: "+ timeHour);
 		var suffix = timeHour  >= 12 ? "PM":"AM";
 		var hours = ((timeHour  + 11) % 12 + 1);
 		var getHour = hours < 10 ? '0' +hours : hours;
-		var timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
-		
-		console.log("Hours in time: "+ hours);
-		console.log("getHours: "+getHour);
-	  
-		console.log("Minutes in time: "+ timeMinute);
-		
+		var timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();		
 		return getHour+':'+timeMinute + ' ' + suffix;
 	  }
-
-	addMinutes(date: Date, minutes: number): Date {
-		return new Date(date.getTime() + minutes * 60000);
-	}
 
 	private renderControl(context:ComponentFramework.Context<IInputs>):void{
 		this.context = context;
@@ -91,21 +61,16 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let userLanguage = context.userSettings.languageId;
 		let userContext = context;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
-		var utcCurrDate = this.getUtcDate(currDate.toDate());
-		//console.log("UtcCurrDate: "+ utcCurrDate);
-		var convertedUTCDate = this.convertDate(utcCurrDate);
-		//console.log("Converted UTC Date: "+ convertedUTCDate);
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			currentDate: context.parameters.CurrentDate.raw != null ? convertedUTCDate : undefined,
+			currentDate: context.parameters.CurrentDate.raw != null ? currDate.toDate() : undefined,
 			userLanguage: userLanguage,
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				this._notifyOutputChanged();
 			},
 			userContext: userContext,
-			isButtonClicked: "false",
-			selectedTimeText: this.getCurrentTime(utcCurrDate)
+			selectedTimeText: this.getCurrentTime(currDate.toDate())
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
