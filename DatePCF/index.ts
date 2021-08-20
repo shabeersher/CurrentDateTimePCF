@@ -46,6 +46,11 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		// Add code to update control view
 	}
 	
+	/**
+	 * Method is responsible for extracting the currentTime from the localDateTime
+	 * @param localDate LocalDate where time needs to be extracted from
+	 * @returns the hour, minute and AM/PM of the DateTime
+	 */
 	private getCurrentTime = (localDate: Date) =>{
 		var timeHour = localDate?.getHours();
 		var suffix = timeHour  >= 12 ? "PM":"AM";
@@ -55,6 +60,10 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		return getHour+':'+timeMinute + ' ' + suffix;
 	  }
 
+	  /**
+	   * Method is responsible for rendering the PCF
+	   * @param context context of the user
+	   */
 	private renderControl(context:ComponentFramework.Context<IInputs>):void{
 		this.context = context;
 
@@ -70,7 +79,8 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 				this._notifyOutputChanged();
 			},
 			userContext: userContext,
-			selectedTimeText: this.getCurrentTime(currDate.toDate())
+			selectedTimeText: this.getCurrentTime(currDate.toDate()),
+			is24Hour: true
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
