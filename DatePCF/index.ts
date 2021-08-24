@@ -5,6 +5,8 @@ import DateControl, {IDateControlProps, IDate} from './DateTimeControl/DateContr
 import {initializeIcons} from '@fluentui/react/lib/Icons';
 import { Context } from "vm";
 import moment = require('moment');
+import { HelperFunctions } from "./DateTimeControl/Helper/HelperFunctions";
+import { unregisterIcons } from "office-ui-fabric-react";
 
 export class CurrentDatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
@@ -59,8 +61,9 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		var timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();		
 		return getHour+':'+timeMinute + ' ' + suffix;
 	  }
+	  
 
-	  /**
+	  /*
 	   * Method is responsible for rendering the PCF
 	   * @param context context of the user
 	   */
@@ -70,6 +73,11 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let userLanguage = context.userSettings.languageId;
 		let userContext = context;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
+		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
+		/*let timeText = HelperFunctions.timeFormat(userContext, 
+						HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(), userContext.userSettings.dateFormattingInfo.timeSeparator)
+						, true)*/
+		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(),userContext.userSettings.dateFormattingInfo.timeSeparator, true)
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
 			currentDate: context.parameters.CurrentDate.raw != null ? currDate.toDate() : undefined,
@@ -79,7 +87,7 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 				this._notifyOutputChanged();
 			},
 			userContext: userContext,
-			selectedTimeText: this.getCurrentTime(currDate.toDate()),
+			selectedTimeText: timeText,
 			is24Hour: true
 		};
 

@@ -1,8 +1,9 @@
 import * as React from 'react';
-import {ComboBox, DatePicker, DayOfWeek, IComboBoxOption, IComboBoxProps, IDatePickerStrings, 
+import {ComboBox, DatePicker, DayOfWeek, format, IComboBoxOption, IComboBoxProps, IDatePickerStrings, 
   mergeStyles, 
   mergeStyleSets, PrimaryButton, Stack} from 'office-ui-fabric-react';
 import { IInputs } from '../generated/ManifestTypes';
+import {HelperFunctions} from '../DateTimeControl/Helper/HelperFunctions';
 
 
 export interface IDate {
@@ -181,7 +182,7 @@ const display24Hours:IComboBoxOption[] = []
             if(interval > 30)
                 continue;
             var hourText = hour < 10 ? '0'+hour : hour;
-            var uniqueKey = hour+''+interval;
+            var uniqueKey = hourText+''+interval;
             var intervalText = interval == 0 ? '00' : interval;
             var time = hourText+' : '+intervalText;
             display24Hours.push(
@@ -236,12 +237,36 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       return !date ? '' : firstPosition + dateSeparator + secondPosition + dateSeparator + thirdPosition;
     }
 
-    private timeFormat = () =>{
-      var timeSeparator = this.state.userContext.userSettings.dateFormattingInfo.timeSeparator;
-      console.log("TimeSeparator: "+ timeSeparator);
 
-      var timeFormat = this.state.userContext.userSettings.dateFormattingInfo.shortTimePattern;
-      console.log("TimeFormat: "+ timeFormat);
+    /*
+    private retrieveTimeFormatValue = (time: string, splitTimeFormat:string, timeSeparator:string):string[] => {
+      console.log("retrieveTimeFormatValue: "+time)
+      var is24Hour = "false";
+      var hour = '', minute = '', amPM='';
+      if(splitTimeFormat != undefined && splitTimeFormat != null)
+      {
+
+        if(splitTimeFormat.includes("h"))
+        {
+          hour = time.split(timeSeparator)[0];
+          minute = time.split(timeSeparator)[1].split(" ")[0];
+          amPM = time.split(timeSeparator)[1].split(" ")[1];
+          is24Hour = "false";
+        }
+        else if(splitTimeFormat.includes("H"))
+        {
+          hour = time.split(timeSeparator)[0];
+          minute = time.split(timeSeparator)[1].split(" ")[0];
+          is24Hour = "true";
+        }
+      }
+      return is24Hour=="false" ? [is24Hour, hour, minute, amPM] : [is24Hour, hour, minute];
+    }
+    */
+
+    private getHour = (time: string): string =>{
+      var hour = "";
+      return "";
     }
     
     /**
@@ -417,24 +442,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       return getHour+':'+timeMinute + ' ' + suffix;
     }
 
-    /**
-     * Method is responsible for converting 12H time into military time
-     * @param time12h 12H time to be converted to military time
-     * @returns Array with Military hour and minute
-     */
-    private convertTimeToMilitaryTime = (time12h:string) =>{
-      const [time, modifier] = time12h.split(' ');
-
-      let [hours, minutes] = time.split(':');
-    
-      if (hours === '12') {
-        hours = '00';
-      }    
-      if (modifier === 'PM') {
-        hours = parseInt(hours, 10) + 12 +'';
-      }
-      return [hours, minutes];
-    }
+ 
 
     /**
      * Method is responsible for extracting the Hour, Minute, AM/PM from the time submitted
@@ -447,7 +455,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var hourMinute = value.split(':');
       var hour = Number.parseInt(hourMinute[0]);
       var minute = Number.parseInt(hourMinute[1]);
-      var combinedTime = [hour, minute, value.split(' ')[1]];
+      var combinedTime = [hour, minute];
       console.log('CombinedTime: '+ combinedTime);
       return combinedTime;
     }
@@ -468,8 +476,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       }
       else if(getAMPM == "PM")
       {
-        var militaryTime = this.convertTimeToMilitaryTime(selectedTimeText as string);
-        this.setDate(new Date(selectedDate.getFullYear(),selectedDate.getMonth(), selectedDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), selectedTimeText as string);
+        //var militaryTime = this.convertTimeToMilitaryTime(selectedTimeText as string);
+        //this.setDate(new Date(selectedDate.getFullYear(),selectedDate.getMonth(), selectedDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), selectedTimeText as string);
       }
     }
 
@@ -481,8 +489,26 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * @param value If the time is changed by writing within the text box, value will have that new value
      */
     private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
+      console.log("Inside onChange");
       var getAMPM = "";
       var stateCurrentDate = this.state.currentDate as Date;
+      var is24Hour = this.state.is24Hour;
+
+      if(is24Hour == true)
+      {
+        //We know that we are dealing with military time
+        if(option != null)
+        {
+          var hourMinute = this.getHourMinuteFromText(option?.text as string)
+          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+          parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), option?.text as string); 
+        }
+        else 
+        {
+          
+        }
+      }
+      /*
       if(option != null)
       {       
         getAMPM = option?.text.split(' ')[1].toUpperCase();
@@ -511,6 +537,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
           this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), value as string);
         }
       }
+      */
       (event);
     }
     
@@ -543,8 +570,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                       <ComboBox 
                         allowFreeform={allowFreeform}
                         buttonIconProps={{iconName:"Clock"}}
-                        options = {display12Hours}
-                        text = {this.state.selectedTimeText} 
+                        options = {this.state.is24Hour ? display24Hours : display12Hours}
+                        text = {this.state.selectedTimeText}
+                        //text = {this.timeFormat()} 
                         onChange={this._onChange}
                        />
                       ): null}                       
