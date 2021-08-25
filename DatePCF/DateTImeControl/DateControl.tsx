@@ -3,7 +3,7 @@ import {ComboBox, DatePicker, DayOfWeek, format, IComboBoxOption, IComboBoxProps
   mergeStyles, 
   mergeStyleSets, PrimaryButton, Stack} from 'office-ui-fabric-react';
 import { IInputs } from '../generated/ManifestTypes';
-import {HelperFunctions} from '../DateTimeControl/Helper/HelperFunctions';
+import {HelperFunctions, display12HoursFormatA, display12HoursFormatB, display24HoursFormatA, display24HoursFormatB} from '../DateTimeControl/Helper/HelperFunctions';
 
 
 export interface IDate {
@@ -14,6 +14,7 @@ export interface IDate {
   selectedTimeKey?: { key: string | number | undefined };
   selectedTimeText?: string;
   is24Hour: boolean;
+  timeSeparator: string;
 }
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
@@ -131,67 +132,6 @@ const desc = 'Ce champ est nécessaire. L’un des formats d’entrée de soutie
  */
 const firstDayOfWeek = DayOfWeek.Sunday;
 
-/**
- * Displays the 12Hour clock in the Time section
- */
-const display12Hours:IComboBoxOption[] = []
-{
-  display12Hours.push(
-    { key: '00', text: '12:00 AM' },
-    { key: '0030', text: '12:30 AM' }
-  )
-
-    for(var hour=1; hour< 12; hour+=1){
-        for(var interval=0; interval<60; interval+=30){
-            if(interval > 30)
-                continue;
-            var hourText = hour < 10 ? '0'+hour : hour;
-            var uniqueKey = hour+''+interval+'am';
-            var intervalText = interval == 0 ? '00' : interval;
-            var time = hourText+':'+intervalText+' AM';
-            display12Hours.push(
-                {key:uniqueKey, text:time}
-            );
-        }
-    }
-    display12Hours.push(
-      { key: '12', text: '12:00 PM' },
-      { key: '1230', text: '12:30 PM' }
-    )
-    for(var hour=1; hour< 12; hour+=1){
-      for(var interval=0; interval<60; interval+=30){
-          if(interval > 30)
-              continue;
-          var hourText = hour < 10 ? '0'+hour : hour;
-          var uniqueKey = hour+''+interval+'pm';
-          var intervalText = interval == 0 ? '00' : interval;
-          var time = hourText+':'+intervalText+' PM';
-          display12Hours.push(
-              {key:uniqueKey, text:time}
-          );
-      }
-  }
-}
-/**
- * Displays the 24Hour clock in the Time section
- */
-const display24Hours:IComboBoxOption[] = []
-{
-    for(var hour=0; hour<= 23; hour+=1){
-        for(var interval=0; interval<60; interval+=30){
-            if(interval > 30)
-                continue;
-            var hourText = hour < 10 ? '0'+hour : hour;
-            var uniqueKey = hourText+''+interval;
-            var intervalText = interval == 0 ? '00' : interval;
-            var time = hourText+' : '+intervalText;
-            display24Hours.push(
-                {key:uniqueKey, text:time}
-            );
-        }
-    }
-}
-
 const wrapperClassName = mergeStyles({
   display: 'flex',
   selectors: {
@@ -216,8 +156,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             userContext: props.userContext,
             selectedTimeKey: props.selectedTimeKey,
             selectedTimeText: props.selectedTimeText,
-            is24Hour: props.is24Hour
-        };  
+            is24Hour: props.is24Hour,
+            timeSeparator: props.timeSeparator
+        };
     }
 
     /**
@@ -228,7 +169,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
     private dateFormat = (date?:Date): string =>{
       var dateFormat = this.state.userContext.userSettings.dateFormattingInfo.shortDatePattern;
       console.log("DateFormat: "+dateFormat);
-      var dateSeparator = this.state.userContext.userSettings.dateFormattingInfo.timeSeparator;
+      var dateSeparator = this.state.userContext.userSettings.dateFormattingInfo.dateSeparator;
       var splitDateFormat = dateFormat.split("/");
 
       var firstPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[0] as string);
@@ -236,33 +177,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var thirdPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[2] as string);
       return !date ? '' : firstPosition + dateSeparator + secondPosition + dateSeparator + thirdPosition;
     }
-
-
-    /*
-    private retrieveTimeFormatValue = (time: string, splitTimeFormat:string, timeSeparator:string):string[] => {
-      console.log("retrieveTimeFormatValue: "+time)
-      var is24Hour = "false";
-      var hour = '', minute = '', amPM='';
-      if(splitTimeFormat != undefined && splitTimeFormat != null)
-      {
-
-        if(splitTimeFormat.includes("h"))
-        {
-          hour = time.split(timeSeparator)[0];
-          minute = time.split(timeSeparator)[1].split(" ")[0];
-          amPM = time.split(timeSeparator)[1].split(" ")[1];
-          is24Hour = "false";
-        }
-        else if(splitTimeFormat.includes("H"))
-        {
-          hour = time.split(timeSeparator)[0];
-          minute = time.split(timeSeparator)[1].split(" ")[0];
-          is24Hour = "true";
-        }
-      }
-      return is24Hour=="false" ? [is24Hour, hour, minute, amPM] : [is24Hour, hour, minute];
-    }
-    */
 
     private getHour = (time: string): string =>{
       var hour = "";
@@ -402,7 +316,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         userContext: this.state.userContext,
         selectedTimeKey: this.state.selectedTimeKey,
         selectedTimeText: this.state.selectedTimeText,
-        is24Hour: this.state.is24Hour
+        is24Hour: this.state.is24Hour,
+        timeSeparator: this.state.timeSeparator
       };
       this.props.onDateChanged(date);
       
@@ -413,7 +328,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * Method is responsible for setting the currentDate of the system
      */
     private getCurrentDate = () =>{
-      var systemDate = new Date();
+      console.log("inside getCurrentDate");
+      var systemDate = new Date()
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
       var day = systemDate.getDate();
@@ -433,13 +349,24 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * @returns String containig the hour, minute and AM/PM from the DateTime
      */
     private getTimeFromDate = (dateTime: Date) =>{
+      var suffix = '', getHour;
+      var hours;
+      var is24Hour = this.state.is24Hour;
+      console.log("Inside getTimeFromDate");
       var currentDateTime = dateTime;
       var timeHour = currentDateTime?.getHours() as number;
-      var suffix = timeHour  >= 12 ? "PM":"AM";
-      var hours = ((timeHour  + 11) % 12 + 1);
-      var getHour = hours < 10 ? '0' +hours : hours;
+      if(is24Hour != true) // We know we are dealing with 12H instead of 24H
+      {
+        suffix = timeHour  >= 12 ? "PM":"AM";
+        hours = ((timeHour  + 11) % 12 + 1);
+      }
+      else
+      {
+        hours = timeHour;
+      }
+      getHour = hours < 10 ? '0' +hours : hours;
       var timeMinute = currentDateTime?.getMinutes() as number < 10 ? '0'+currentDateTime?.getMinutes() : currentDateTime?.getMinutes();
-      return getHour+':'+timeMinute + ' ' + suffix;
+      return getHour+this.state.timeSeparator+timeMinute + ' ' + suffix;
     }
 
  
@@ -452,7 +379,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
     private getHourMinuteFromText(value:string)
     {
       console.log("The value is: "+ value);
-      var hourMinute = value.split(':');
+      var hourMinute = value.split(this.state.timeSeparator);
       var hour = Number.parseInt(hourMinute[0]);
       var minute = Number.parseInt(hourMinute[1]);
       var combinedTime = [hour, minute];
@@ -468,16 +395,29 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
     {
       console.log("SelectedDate: "+ selectedDate);
       var selectedTimeText = this.state.selectedTimeText;
-      var getAMPM = selectedTimeText?.split(' ')[1].toUpperCase();
-      if(getAMPM == "AM")
+      var is24Hour = this.state.is24Hour;
+
+      if(is24Hour == true)
       {
-        var hourMinute = this.getHourMinuteFromText(selectedTimeText as string);
-        this.setDate(new Date(selectedDate.getFullYear(),selectedDate.getMonth(), selectedDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), selectedTimeText as string);
+        var hourMinute = this.getHourMinuteFromText(selectedTimeText as string)
+        this.setDate(new Date(selectedDate.getFullYear(),selectedDate.getMonth(), selectedDate.getDate(), 
+        parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), selectedTimeText as string); 
       }
-      else if(getAMPM == "PM")
+      else
       {
-        //var militaryTime = this.convertTimeToMilitaryTime(selectedTimeText as string);
-        //this.setDate(new Date(selectedDate.getFullYear(),selectedDate.getMonth(), selectedDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), selectedTimeText as string);
+        var getAMPM = selectedTimeText?.split(' ')[1].toUpperCase();
+        if(getAMPM == "AM")
+        {
+          var hourMinute = this.getHourMinuteFromText(selectedTimeText as string);
+          this.setDate(new Date(selectedDate.getFullYear(),selectedDate.getMonth(), selectedDate.getDate(), 
+          parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), selectedTimeText as string);
+        }
+        else if(getAMPM == "PM")
+        {
+          var militaryTime = HelperFunctions.convertTimeToMilitaryTime(selectedTimeText as string, this.state.timeSeparator);
+          this.setDate(new Date(selectedDate.getFullYear(),selectedDate.getMonth(), selectedDate.getDate(), 
+          parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), selectedTimeText as string);
+        }
       }
     }
 
@@ -490,7 +430,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      */
     private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
       console.log("Inside onChange");
-      var getAMPM = "";
       var stateCurrentDate = this.state.currentDate as Date;
       var is24Hour = this.state.is24Hour;
 
@@ -505,40 +444,40 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         }
         else 
         {
-          
+          var hourMinute = this.getHourMinuteFromText(value as string);
+          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+          parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), value as string);
         }
       }
-      /*
-      if(option != null)
-      {       
-        getAMPM = option?.text.split(' ')[1].toUpperCase();
-        if(getAMPM == "AM" )
-        {
-          var hourMinute = this.getHourMinuteFromText(option?.text as string);
-          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), option?.text as string); 
-        }
-        else if(getAMPM == "PM")
-        {
-          var militaryTime = this.convertTimeToMilitaryTime(option?.text as string);
-          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), option?.text as string);
-        }
-      } 
       else
       {
-        getAMPM = value?.split(' ')[1].toUpperCase() as string;
-        if(getAMPM == "AM")
+        if(option != null)
         {
-          var hourMinute = this.getHourMinuteFromText(value as string);
-          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), value as string);
+            var militaryTime = HelperFunctions.convertTimeToMilitaryTime(option?.text as string, this.state.timeSeparator);
+            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+            parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), option?.text as string);
         }
-        else if(getAMPM == "PM")
+        else
         {
-          var militaryTime = this.convertTimeToMilitaryTime(value as string);
-          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), value as string);
+            var militaryTime = HelperFunctions.convertTimeToMilitaryTime(value as string, this.state.timeSeparator);
+            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+            parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), value as string);
         }
       }
-      */
       (event);
+    }
+
+    private displayHourOptions()
+    {
+      console.log("inside dispalyHourOptions");
+      if(this.state.is24Hour == false && this.state.timeSeparator === ':')
+        return display12HoursFormatA;
+      else if(this.state.is24Hour == false && this.state.timeSeparator === '.')
+        return display12HoursFormatB;
+      else if(this.state.is24Hour == true && this.state.timeSeparator === ':')
+        return display24HoursFormatA
+      else if(this.state.is24Hour == true && this.state.timeSeparator === '.')
+        return display24HoursFormatB
     }
     
     /**
@@ -560,7 +499,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             firstDayOfWeek={firstDayOfWeek}
                             strings = {this.state.userLanguage == 1036 ? DayPickerFrenchStrings : DayPickerEnglishStrings}
                             formatDate = {this.dateFormat}
-                            parseDateFromString = {onParseDateFromString}
+                            //parseDateFromString = {onParseDateFromString}
                            onSelectDate = {(selected => this.setOnSelectChangeDate(selected))}
                             value={this.state.currentDate }
                         />
@@ -570,9 +509,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                       <ComboBox 
                         allowFreeform={allowFreeform}
                         buttonIconProps={{iconName:"Clock"}}
-                        options = {this.state.is24Hour ? display24Hours : display12Hours}
+                        options = {this.displayHourOptions()}
                         text = {this.state.selectedTimeText}
-                        //text = {this.timeFormat()} 
                         onChange={this._onChange}
                        />
                       ): null}                       

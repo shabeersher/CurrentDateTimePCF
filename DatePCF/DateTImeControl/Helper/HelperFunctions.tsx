@@ -1,33 +1,128 @@
-import { Context } from "vm";
+import { IComboBoxOption } from "office-ui-fabric-react";
 import { IInputs } from "../../generated/ManifestTypes";
 
-export class HelperFunctions{
-    /*
-    public static timeFormat = (userContext: ComponentFramework.Context<IInputs>, selectedTimeText: string) =>{
-        var timeFormat = userContext.userSettings.dateFormattingInfo.shortDatePattern;
-        //var timeFormat = this.state.userContext.userSettings.dateFormattingInfo.shortTimePattern;
-        console.log("TimeFormat: "+ timeFormat);
-        var timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
-        //var timeSeparator = this.state.userContext.userSettings.dateFormattingInfo.timeSeparator;
-        var splitTimeFormat = timeFormat.split(timeSeparator);
-        var selectedTimeText = selectedTimeText;
-  
-        var formattedTime = HelperFunctions.retrieveTimeFormatValue(selectedTimeText, splitTimeFormat[0], timeSeparator);
-        return formattedTime[0] == "false" ? formattedTime[1] + timeSeparator + formattedTime[2] +" "+ formattedTime[3] 
-        : formattedTime[1] + timeSeparator + formattedTime[2];
-      }
-*/
-/*
-        public static timeFormat = (userContext: ComponentFramework.Context<IInputs>,selectedTimeText: string, is24Hour: boolean) =>{
-            var timeFormat = userContext.userSettings.dateFormattingInfo.shortTimePattern;
-            console.log("TimeFormat: "+ timeFormat);
-            var timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+/**
+ * Displays the 12Hour clock in the Time section
+ */
+ export const display12HoursFormatA:IComboBoxOption[] = []
+ {
+    display12HoursFormatA.push(
+     { key: '00', text: '12:00 AM' },
+     { key: '0030', text: '12:30 AM' }
+   )
+ 
+     for(var hour=1; hour< 12; hour+=1){
+         for(var interval=0; interval<60; interval+=30){
+             if(interval > 30)
+                 continue;
+             var hourText = hour < 10 ? '0'+hour : hour;
+             var uniqueKey = hour+''+interval+'am';
+             var intervalText = interval == 0 ? '00' : interval;
+             var time = hourText+':'+intervalText+' AM';
+             display12HoursFormatA.push(
+                 {key:uniqueKey, text:time}
+             );
+         }
+     }
+     display12HoursFormatA.push(
+       { key: '12', text: '12:00 PM' },
+       { key: '1230', text: '12:30 PM' }
+     )
+     for(var hour=1; hour< 12; hour+=1){
+       for(var interval=0; interval<60; interval+=30){
+           if(interval > 30)
+               continue;
+           var hourText = hour < 10 ? '0'+hour : hour;
+           var uniqueKey = hour+''+interval+'pm';
+           var intervalText = interval == 0 ? '00' : interval;
+           var time = hourText+':'+intervalText+' PM';
+           display12HoursFormatA.push(
+               {key:uniqueKey, text:time}
+           );
+       }
+   }
+ }
 
-            var formattedTime = HelperFunctions.retrieveTimeFormatValue(selectedTimeText as string, timeSeparator, is24Hour);
-            return is24Hour == false ? formattedTime[0] +" "+ timeSeparator +" "+ formattedTime[1] +" "+ formattedTime[2] 
-            : formattedTime[0] +" "+ timeSeparator +" "+ formattedTime[1];
+ export const display12HoursFormatB:IComboBoxOption[] = []
+ {
+    display12HoursFormatB.push(
+     { key: '00', text: '12.00 AM' },
+     { key: '0030', text: '12.30 AM' }
+   )
+ 
+     for(var hour=1; hour< 12; hour+=1){
+         for(var interval=0; interval<60; interval+=30){
+             if(interval > 30)
+                 continue;
+             var hourText = hour < 10 ? '0'+hour : hour;
+             var uniqueKey = hour+''+interval+'am';
+             var intervalText = interval == 0 ? '00' : interval;
+             var time = hourText+'.'+intervalText+' AM';
+             display12HoursFormatB.push(
+                 {key:uniqueKey, text:time}
+             );
+         }
+     }
+     display12HoursFormatB.push(
+       { key: '12', text: '12.00 PM' },
+       { key: '1230', text: '12.30 PM' }
+     )
+     for(var hour=1; hour< 12; hour+=1){
+       for(var interval=0; interval<60; interval+=30){
+           if(interval > 30)
+               continue;
+           var hourText = hour < 10 ? '0'+hour : hour;
+           var uniqueKey = hour+''+interval+'pm';
+           var intervalText = interval == 0 ? '00' : interval;
+           var time = hourText+'.'+intervalText+' PM';
+           display12HoursFormatB.push(
+               {key:uniqueKey, text:time}
+           );
+       }
+   }
+ }
+
+ /**
+ * Displays the 24Hour clock in the Time section
+ */
+export const display24HoursFormatA:IComboBoxOption[] = []
+{
+    for(var hour=0; hour<= 23; hour+=1){
+        for(var interval=0; interval<60; interval+=30){
+            if(interval > 30)
+                continue;
+            var hourText = hour < 10 ? '0'+hour : hour;
+            var uniqueKey = hourText+''+interval;
+            var intervalText = interval == 0 ? '00' : interval;
+            var time = hourText+':'+intervalText;
+            display24HoursFormatA.push(
+                {key:uniqueKey, text:time}
+            );
         }
-*/
+    }
+}
+
+ /**
+ * Displays the 24Hour clock in the Time section
+ */
+  export const display24HoursFormatB:IComboBoxOption[] = []
+  {
+      for(var hour=0; hour<= 23; hour+=1){
+          for(var interval=0; interval<60; interval+=30){
+              if(interval > 30)
+                  continue;
+              var hourText = hour < 10 ? '0'+hour : hour;
+              var uniqueKey = hourText+''+interval;
+              var intervalText = interval == 0 ? '00' : interval;
+              var time = hourText+'.'+intervalText;
+              display24HoursFormatB.push(
+                  {key:uniqueKey, text:time}
+              );
+          }
+      }
+  }
+
+ export class HelperFunctions{
         public static getCurrentTimeFromDateTime = (localDate: Date, timeSeparator: string, is24Hour: boolean) =>{
             var hour = localDate?.getHours();
             var time24Hour,timeHour, suffix ='', timeMinute, time12Hour;
@@ -40,16 +135,11 @@ export class HelperFunctions{
             else
             {
                 timeHour = ((hour  + 11) % 12 + 1)
-                suffix = timeHour >= 12 ? "PM":"AM";
+                suffix = hour >= 12 ? "PM":"AM";
                 time12Hour = timeHour < 10 ? '0'+timeHour : timeHour;
                 timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
-            }
-
-            //var suffix = timeHour  >= 12 ? "PM":"AM";
-            //var hours = ((timeHour  + 11) % 12 + 1);
-            //var getHour = hours < 10 ? '0' +hours : hours;
-            		
-            return is24Hour == true ? time24Hour+" "+timeSeparator+" "+timeMinute : time12Hour+" "+timeSeparator+" "+timeMinute+" "+suffix;
+            }          		
+            return is24Hour == true ? time24Hour+timeSeparator+timeMinute : time12Hour+timeSeparator+timeMinute+" "+suffix;
           }
       public static retrieveTimeFormatValue = (time: string, timeSeparator:string, is24Hour: boolean):string[] => {
         console.log("retrieveTimeFormatValue: "+time)
@@ -75,8 +165,8 @@ export class HelperFunctions{
       public static isMilitaryTime = (userContext:ComponentFramework.Context<IInputs>):boolean =>
       {
         var timeFormat = userContext.userSettings.dateFormattingInfo.shortTimePattern;
-        var timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
-        var splitTimeFormat = timeFormat.split(timeSeparator);
+        //var timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+        var splitTimeFormat = timeFormat.split(':');
         var is24Hour = true;
         console.log("Inside HelperFunction.isMilitaryTime.TimeFormat: "+timeFormat);
         if(splitTimeFormat.includes("h") || splitTimeFormat.includes("hh"))
@@ -121,4 +211,5 @@ export class HelperFunctions{
         }
         return convertedHour;
       }
+      
 }

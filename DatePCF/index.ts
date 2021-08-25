@@ -47,22 +47,6 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		this.renderControl(context);
 		// Add code to update control view
 	}
-	
-	/**
-	 * Method is responsible for extracting the currentTime from the localDateTime
-	 * @param localDate LocalDate where time needs to be extracted from
-	 * @returns the hour, minute and AM/PM of the DateTime
-	 */
-	private getCurrentTime = (localDate: Date) =>{
-		var timeHour = localDate?.getHours();
-		var suffix = timeHour  >= 12 ? "PM":"AM";
-		var hours = ((timeHour  + 11) % 12 + 1);
-		var getHour = hours < 10 ? '0' +hours : hours;
-		var timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();		
-		return getHour+':'+timeMinute + ' ' + suffix;
-	  }
-	  
-
 	  /*
 	   * Method is responsible for rendering the PCF
 	   * @param context context of the user
@@ -74,10 +58,9 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let userContext = context;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
 		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
-		/*let timeText = HelperFunctions.timeFormat(userContext, 
-						HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(), userContext.userSettings.dateFormattingInfo.timeSeparator)
-						, true)*/
-		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(),userContext.userSettings.dateFormattingInfo.timeSeparator, true)
+		console.log("IsMilitaryTime: "+ isMilitaryTime);
+		let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(),timeSeparator, isMilitaryTime)
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
 			currentDate: context.parameters.CurrentDate.raw != null ? currDate.toDate() : undefined,
@@ -88,7 +71,8 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 			},
 			userContext: userContext,
 			selectedTimeText: timeText,
-			is24Hour: true
+			timeSeparator: timeSeparator,
+			is24Hour: isMilitaryTime
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
