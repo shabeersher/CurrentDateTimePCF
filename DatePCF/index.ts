@@ -58,7 +58,6 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let userContext = context;
 		let currDate = moment(context.parameters.CurrentDate.raw as Date);
 		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
-		console.log("IsMilitaryTime: "+ isMilitaryTime);
 		let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
 		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(),timeSeparator, isMilitaryTime)
 		const compositeDateControlProps: IDateControlProps = {

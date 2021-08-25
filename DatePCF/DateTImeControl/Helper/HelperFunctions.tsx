@@ -2,7 +2,7 @@ import { IComboBoxOption } from "office-ui-fabric-react";
 import { IInputs } from "../../generated/ManifestTypes";
 
 /**
- * Displays the 12Hour clock in the Time section
+ * Displays the 12Hour clock in the Time section Formatted with a colon
  */
  export const display12HoursFormatA:IComboBoxOption[] = []
  {
@@ -43,6 +43,9 @@ import { IInputs } from "../../generated/ManifestTypes";
    }
  }
 
+ /**
+ * Displays the 12Hour clock in the Time section Formatted with a dot
+ */
  export const display12HoursFormatB:IComboBoxOption[] = []
  {
     display12HoursFormatB.push(
@@ -83,7 +86,7 @@ import { IInputs } from "../../generated/ManifestTypes";
  }
 
  /**
- * Displays the 24Hour clock in the Time section
+ * Displays the 24Hour clock in the Time section Formatted with a colon
  */
 export const display24HoursFormatA:IComboBoxOption[] = []
 {
@@ -103,7 +106,7 @@ export const display24HoursFormatA:IComboBoxOption[] = []
 }
 
  /**
- * Displays the 24Hour clock in the Time section
+ * Displays the 24Hour clock in the Time section Formatted with a dot
  */
   export const display24HoursFormatB:IComboBoxOption[] = []
   {
@@ -123,52 +126,30 @@ export const display24HoursFormatA:IComboBoxOption[] = []
   }
 
  export class HelperFunctions{
-        public static getCurrentTimeFromDateTime = (localDate: Date, timeSeparator: string, is24Hour: boolean) =>{
-            var hour = localDate?.getHours();
-            var time24Hour,timeHour, suffix ='', timeMinute, time12Hour;
-            if(is24Hour == true)
-            {
-
-                time24Hour = hour < 10 ? '0' + hour : hour;
-                timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
-            }
-            else
-            {
-                timeHour = ((hour  + 11) % 12 + 1)
-                suffix = hour >= 12 ? "PM":"AM";
-                time12Hour = timeHour < 10 ? '0'+timeHour : timeHour;
-                timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
-            }          		
-            return is24Hour == true ? time24Hour+timeSeparator+timeMinute : time12Hour+timeSeparator+timeMinute+" "+suffix;
-          }
-      public static retrieveTimeFormatValue = (time: string, timeSeparator:string, is24Hour: boolean):string[] => {
-        console.log("retrieveTimeFormatValue: "+time)
-        var hour = '', minute = '', amPM='';
-        if(timeSeparator != undefined && timeSeparator != null)
+    public static getCurrentTimeFromDateTime = (localDate: Date, timeSeparator: string, is24Hour: boolean) =>{
+        var hour = localDate?.getHours();
+        var time24Hour,timeHour, suffix ='', timeMinute, time12Hour;
+        if(is24Hour == true)
         {
-  
-          if(is24Hour == false)
-          {
-            hour = HelperFunctions.convertHourToMilitary(time.split(timeSeparator)[0]);
-            minute = time.split(timeSeparator)[1].split(" ")[0];
-            amPM = time.split(timeSeparator)[1].split(" ")[1];
-          }
-          else if(is24Hour == true)
-          {
-            hour = time.split(timeSeparator)[0];
-            minute = time.split(timeSeparator)[1];
-          }
-        }
-        return is24Hour == false ? [hour, minute, amPM] : [hour, minute];
-      }
 
+            time24Hour = hour < 10 ? '0' + hour : hour;
+            timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
+        }
+        else
+        {
+            timeHour = ((hour  + 11) % 12 + 1)
+            suffix = hour >= 12 ? "PM":"AM";
+            time12Hour = timeHour < 10 ? '0'+timeHour : timeHour;
+            timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
+        }          		
+        return is24Hour == true ? time24Hour+timeSeparator+timeMinute : time12Hour+timeSeparator+timeMinute+" "+suffix;
+        }
       public static isMilitaryTime = (userContext:ComponentFramework.Context<IInputs>):boolean =>
       {
         var timeFormat = userContext.userSettings.dateFormattingInfo.shortTimePattern;
         //var timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
         var splitTimeFormat = timeFormat.split(':');
         var is24Hour = true;
-        console.log("Inside HelperFunction.isMilitaryTime.TimeFormat: "+timeFormat);
         if(splitTimeFormat.includes("h") || splitTimeFormat.includes("hh"))
         {
             is24Hour = false;
@@ -197,19 +178,6 @@ export const display24HoursFormatA:IComboBoxOption[] = []
           hours = parseInt(hours, 10) + 12 +'';
         }
         return [hours, minutes];
-      }
-
-      public static convertHourToMilitary = (hours:string) =>{
-        let convertedHour = '';  
-        if(hours === '12')
-        {
-            convertedHour = '00';
-        }
-        else
-        {
-            convertedHour = parseInt(hours, 10) + 12 +'';
-        }
-        return convertedHour;
       }
       
 }

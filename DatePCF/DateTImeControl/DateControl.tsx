@@ -168,7 +168,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      */
     private dateFormat = (date?:Date): string =>{
       var dateFormat = this.state.userContext.userSettings.dateFormattingInfo.shortDatePattern;
-      console.log("DateFormat: "+dateFormat);
       var dateSeparator = this.state.userContext.userSettings.dateFormattingInfo.dateSeparator;
       var splitDateFormat = dateFormat.split("/");
 
@@ -328,7 +327,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * Method is responsible for setting the currentDate of the system
      */
     private getCurrentDate = () =>{
-      console.log("inside getCurrentDate");
       var systemDate = new Date()
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
@@ -352,7 +350,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var suffix = '', getHour;
       var hours;
       var is24Hour = this.state.is24Hour;
-      console.log("Inside getTimeFromDate");
       var currentDateTime = dateTime;
       var timeHour = currentDateTime?.getHours() as number;
       if(is24Hour != true) // We know we are dealing with 12H instead of 24H
@@ -378,12 +375,10 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      */
     private getHourMinuteFromText(value:string)
     {
-      console.log("The value is: "+ value);
       var hourMinute = value.split(this.state.timeSeparator);
       var hour = Number.parseInt(hourMinute[0]);
       var minute = Number.parseInt(hourMinute[1]);
       var combinedTime = [hour, minute];
-      console.log('CombinedTime: '+ combinedTime);
       return combinedTime;
     }
 
@@ -393,7 +388,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      */
     private setOnSelectChangeDate(selectedDate:Date)
     {
-      console.log("SelectedDate: "+ selectedDate);
       var selectedTimeText = this.state.selectedTimeText;
       var is24Hour = this.state.is24Hour;
 
@@ -429,7 +423,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * @param value If the time is changed by writing within the text box, value will have that new value
      */
     private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
-      console.log("Inside onChange");
       var stateCurrentDate = this.state.currentDate as Date;
       var is24Hour = this.state.is24Hour;
 
@@ -467,9 +460,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       (event);
     }
 
+    /**
+     * Method is responsible for displaying the correct time in dropdown for time
+     * @returns Display format of the time
+     */
     private displayHourOptions()
     {
-      console.log("inside dispalyHourOptions");
       if(this.state.is24Hour == false && this.state.timeSeparator === ':')
         return display12HoursFormatA;
       else if(this.state.is24Hour == false && this.state.timeSeparator === '.')
