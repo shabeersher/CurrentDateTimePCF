@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {ComboBox, DatePicker, DayOfWeek, format, IComboBoxOption, IComboBoxProps, IDatePickerStrings, 
   mergeStyles, 
-  mergeStyleSets, PrimaryButton, Stack} from 'office-ui-fabric-react';
+  mergeStyleSets, PrimaryButton, Stack, themeRulesStandardCreator} from 'office-ui-fabric-react';
 import { IInputs } from '../generated/ManifestTypes';
 import {HelperFunctions, display12HoursFormatA, display12HoursFormatB, display24HoursFormatA, display24HoursFormatB} from '../DateTimeControl/Helper/HelperFunctions';
 
@@ -15,6 +15,7 @@ export interface IDate {
   selectedTimeText?: string;
   is24Hour: boolean;
   timeSeparator: string;
+  errorMessage: boolean;
 }
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
@@ -157,7 +158,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             selectedTimeKey: props.selectedTimeKey,
             selectedTimeText: props.selectedTimeText,
             is24Hour: props.is24Hour,
-            timeSeparator: props.timeSeparator
+            timeSeparator: props.timeSeparator,
+            errorMessage: props.errorMessage
         };
     }
 
@@ -175,11 +177,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       var secondPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[1] as string);
       var thirdPosition = this.retrieveDateFormatValue(date as Date, splitDateFormat[2] as string);
       return !date ? '' : firstPosition + dateSeparator + secondPosition + dateSeparator + thirdPosition;
-    }
-
-    private getHour = (time: string): string =>{
-      var hour = "";
-      return "";
     }
     
     /**
@@ -298,10 +295,10 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * @param value Time to be set to the state of the selectedTimeText
      */
     private setDate = (date:Date, value:string) =>{
-      this.setState({
-        currentDate: date,
-        selectedTimeText: value
-      }, this.onDateChanged);
+        this.setState({
+          currentDate: date,
+          selectedTimeText: value,
+        }, this.onDateChanged);
     }
 
     /**
@@ -316,7 +313,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         selectedTimeKey: this.state.selectedTimeKey,
         selectedTimeText: this.state.selectedTimeText,
         is24Hour: this.state.is24Hour,
-        timeSeparator: this.state.timeSeparator
+        timeSeparator: this.state.timeSeparator,
+        errorMessage: this.state.errorMessage
       };
       this.props.onDateChanged(date);
       
@@ -339,6 +337,11 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         this.setDate(new Date(year, month, day, hour, minute), 
             this.getTimeFromDate(new Date(year, month, day, hour, minute)));
       }
+      this.setState({
+        errorMessage: false
+      }, ()=>{
+        console.log("Error Message in currentDate: "+ this.state.errorMessage)
+      } )
     }
     
     /**
@@ -399,7 +402,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       }
       else
       {
-        var getAMPM = selectedTimeText?.split(' ')[1].toUpperCase();
+        var getAMPM = selectedTimeText?.split(' ')[1];
         if(getAMPM == "AM")
         {
           var hourMinute = this.getHourMinuteFromText(selectedTimeText as string);
@@ -431,30 +434,119 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         //We know that we are dealing with military time
         if(option != null)
         {
+          var isValid = HelperFunctions.validateTime(option?.text as string, this.state.is24Hour);
+          if(isValid == true)
+          {
+            this.setState({
+              errorMessage : false
+            });
+          }
+          else
+          {
+            this.setState({
+              errorMessage : true
+            })
+          }
           var hourMinute = this.getHourMinuteFromText(option?.text as string)
-          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
-          parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), option?.text as string); 
+          if(isNaN(hourMinute[0]) == false && isNaN(hourMinute[1]) == false)
+          {
+            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+            parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), option?.text as string); 
+          }
+          else
+          {
+            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+            stateCurrentDate.getHours(), stateCurrentDate.getMinutes()), option?.text as string);
+          }
         }
         else 
         {
+          var isValid = HelperFunctions.validateTime(value as string, this.state.is24Hour);
+          if(isValid == true)
+          {
+            this.setState({
+              errorMessage : false
+            });
+          }
+          else
+          {
+            this.setState({
+              errorMessage : true
+            })
+          }
           var hourMinute = this.getHourMinuteFromText(value as string);
-          this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
-          parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), value as string);
+          if(isNaN(hourMinute[0]) == false && isNaN(hourMinute[1]) == false)
+          {
+            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+            parseInt(hourMinute[0].toString()), parseInt(hourMinute[1].toString())), value as string);
+          }
+          else
+          {
+            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+            stateCurrentDate.getHours(), stateCurrentDate.getMinutes()), value as string);
+          }
+
         }
       }
       else
       {
         if(option != null)
         {
+
+            var isValid = HelperFunctions.validateTime(option?.text, this.state.is24Hour);
+            if(isValid == true)
+            {
+              this.setState({
+                errorMessage : false
+              })
+            }
+            else
+            {
+              this.setState({
+                errorMessage : true
+              })
+            }
+
             var militaryTime = HelperFunctions.convertTimeToMilitaryTime(option?.text as string, this.state.timeSeparator);
-            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
-            parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), option?.text as string);
+            if(isNaN(parseInt(militaryTime[0].toString())) == false && isNaN(parseInt(militaryTime[1].toString()))==false)
+            {
+              this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+              parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), option?.text as string);
+            }
+            else
+            {
+              this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+              stateCurrentDate.getHours(), stateCurrentDate.getMinutes()), option?.text as string);
+            }
+
         }
         else
         {
+            var isValid = HelperFunctions.validateTime(value as string, this.state.is24Hour);
+            if(isValid == true)
+            {
+              this.setState({
+                errorMessage : false
+              })
+            }
+            else
+            {
+              this.setState({
+                errorMessage : true
+              })
+            }
             var militaryTime = HelperFunctions.convertTimeToMilitaryTime(value as string, this.state.timeSeparator);
-            this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
-            parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), value as string);
+            if(isNaN(parseInt(militaryTime[0].toString())) == false && isNaN(parseInt(militaryTime[1].toString()))==false)
+            {
+              this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+              parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), value as string);
+            }
+            else
+            {
+              this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+              stateCurrentDate.getHours(), stateCurrentDate.getMinutes()), value as string);
+            }
+
         }
       }
       (event);
@@ -483,6 +575,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      */
     render(){
       const allowFreeform = true;
+      const timePattern = this.state.is24Hour == true ? 'HH'+this.state.userContext.userSettings.dateFormattingInfo.timeSeparator+'MM'
+                          : 'hh'+this.state.userContext.userSettings.dateFormattingInfo.timeSeparator+'mm AM/PM';
+      const errorMessage = this.state.userLanguage == 1036 ?'Entrée de temps non valide. '+timePattern
+                          :'Invalid Time Entry. '+timePattern;
+      const dateLabel = this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date";
+      const dateTimeLabel = this.state.userLanguage == 1036 ? "Date/heure actuelle " : "Current Date/Time"
         return(
             <div>
                 <Stack horizontal> 
@@ -508,14 +606,21 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         options = {this.displayHourOptions()}
                         text = {this.state.selectedTimeText}
                         onChange={this._onChange}
+                        errorMessage={this.state.errorMessage == true ? errorMessage : undefined}
                        />
                       ): null}                       
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
+                      {this.props.isDateOnly == false ? (
                         <PrimaryButton 
-                                text={this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date"}
+                                text={dateTimeLabel}
                                 onClick={this.getCurrentDate}
                             />
+                      ):
+                      <PrimaryButton 
+                                text={dateLabel}
+                                onClick={this.getCurrentDate}
+                            />}
                     </Stack>
                 </Stack>        
             </div>

@@ -71,7 +71,8 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 			userContext: userContext,
 			selectedTimeText: timeText,
 			timeSeparator: timeSeparator,
-			is24Hour: isMilitaryTime
+			is24Hour: isMilitaryTime,
+			errorMessage: false
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);

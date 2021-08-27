@@ -147,7 +147,7 @@ export const display24HoursFormatA:IComboBoxOption[] = []
       public static isMilitaryTime = (userContext:ComponentFramework.Context<IInputs>):boolean =>
       {
         var timeFormat = userContext.userSettings.dateFormattingInfo.shortTimePattern;
-        //var timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+
         var splitTimeFormat = timeFormat.split(':');
         var is24Hour = true;
         if(splitTimeFormat.includes("h") || splitTimeFormat.includes("hh"))
@@ -167,8 +167,8 @@ export const display24HoursFormatA:IComboBoxOption[] = []
          * @returns Array with Military hour and minute
          */
         public static convertTimeToMilitaryTime = (time12h:string, timeSeparator:string) =>{
-        const [time, modifier] = time12h.split(' ');
-        
+        let [time, modifier] = time12h.split(' ');
+        modifier = modifier.toUpperCase().trim().toString();
         let [hours, minutes] = time.split(timeSeparator);
       
         if (hours === '12') {
@@ -179,5 +179,32 @@ export const display24HoursFormatA:IComboBoxOption[] = []
         }
         return [hours, minutes];
       }
-      
+
+      public static validateTime = (time12h:string, is24Hour:boolean) => {
+            if(is24Hour == true)
+            {
+                var amPM = time12h.substring(time12h.length - 2).toUpperCase().trim().toString();
+                if((amPM != null) && ((amPM == "AM") || (amPM == "PM")))
+                {
+                    return false;
+                }
+                else
+                {
+                    return true
+                }
+            }
+            else
+            {
+                var amPM = time12h.substring(time12h.lastIndexOf(' ')).toUpperCase().trim().toString();
+                if((amPM != null) && ((amPM == "AM") || (amPM == "PM")))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            
+      }
 }
