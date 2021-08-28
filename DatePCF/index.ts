@@ -64,7 +64,6 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(),timeSeparator, isMilitaryTime)
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			//currentDate: contextDate != null ? currDate?.toDate() : undefined,
 			currentDate: currDate.toDate(),
 			userLanguage: userLanguage,
 			onDateChanged:(d:IDate) => {

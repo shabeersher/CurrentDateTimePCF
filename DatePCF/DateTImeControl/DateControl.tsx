@@ -593,7 +593,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                           :'Invalid Time Entry. '+timePattern;
       const dateLabel = this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date";
       const dateTimeLabel = this.state.userLanguage == 1036 ? "Date/heure actuelle " : "Current Date/Time"
-      const answer = this.state.selectedTimeText;
+      const selectedTimeText = this.state.selectedTimeText;
         return(
             <div>
                 <Stack horizontal> 
@@ -606,7 +606,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             firstDayOfWeek={firstDayOfWeek}
                             strings = {this.state.userLanguage == 1036 ? DayPickerFrenchStrings : DayPickerEnglishStrings}
                             formatDate = {this.dateFormat}
-                            //parseDateFromString = {onParseDateFromString}
                            onSelectDate = {(selected => this.setOnSelectChangeDate(selected))}
                             value={this.state.currentDate }
                         />
@@ -617,11 +616,9 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         allowFreeform={allowFreeform}
                         buttonIconProps={{iconName:"Clock"}}
                         options = {this.displayHourOptions()}
-                        //text = {this.state.selectedTimeText != undefined ? this.state.selectedTimeText : ''}
-                        text = {answer}
+                        text = {selectedTimeText}
                         onChange={this._onChange}
                         errorMessage={this.state.errorMessage == true ? errorMessage : undefined}
-                        //defaultSelectedKey ={this.state.is24Hour == true ? '090' : '80am'}
                        />
                       ): null}                       
                     </Stack>

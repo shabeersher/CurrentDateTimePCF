@@ -1,6 +1,6 @@
-<?xml version="3.0.0.0" encoding="utf-8" ?>
+<?xml version="3.0.0.1" encoding="utf-8" ?>
 <manifest>
-  <control namespace="DATETIMECONTROL" constructor="CurrentDatePCF" version="3.0.0" display-name-key="CurrentDateTIMEPCF" description-key="DatePCF description use for current date/time" control-type="standard">
+  <control namespace="DATETIMECONTROL" constructor="CurrentDatePCF" version="3.0.1" display-name-key="CurrentDateTIMEPCF" description-key="DatePCF description use for current date/time" control-type="standard">
     <!-- property node identifies a specific, configurable piece of data that the control expects from CDS -->
     <type-group name="datetime">
       <type>DateAndTime.DateOnly</type>
