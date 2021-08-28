@@ -325,6 +325,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * Method is responsible for setting the currentDate of the system
      */
     private getCurrentDate = () =>{
+      console.log("GetCuurentDate called");
       var systemDate = new Date()
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
@@ -334,14 +335,21 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
 
       if(year != null && month != null && day != null && hour != null && minute != null)
       {
+        
         this.setDate(new Date(year, month, day, hour, minute), 
             this.getTimeFromDate(new Date(year, month, day, hour, minute)));
+/*
+            this.setDate(new Date(year, month, day, hour, minute), 
+            "Test Year");
+            */
       }
+      
       this.setState({
         errorMessage: false
       }, ()=>{
         console.log("Error Message in currentDate: "+ this.state.errorMessage)
       } )
+      
     }
     
     /**
@@ -426,6 +434,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * @param value If the time is changed by writing within the text box, value will have that new value
      */
     private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
+      
+      console.log("OnChange method called");
       var stateCurrentDate = this.state.currentDate as Date;
       var is24Hour = this.state.is24Hour;
 
@@ -488,7 +498,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
 
         }
       }
-      else
+      else if(is24Hour == false)
       {
         if(option != null)
         {
@@ -508,7 +518,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             }
 
             var militaryTime = HelperFunctions.convertTimeToMilitaryTime(option?.text as string, this.state.timeSeparator);
-            if(isNaN(parseInt(militaryTime[0].toString())) == false && isNaN(parseInt(militaryTime[1].toString()))==false)
+            var validateMilitaryTime = HelperFunctions.validateData(militaryTime);
+            if(validateMilitaryTime == true && isNaN(parseInt(militaryTime[0].toString())) == false && isNaN(parseInt(militaryTime[1].toString()))==false)
             {
               this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
               parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), option?.text as string);
@@ -518,9 +529,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
               this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
               stateCurrentDate.getHours(), stateCurrentDate.getMinutes()), option?.text as string);
             }
-
         }
-        else
+        else if(value != null)
         {
             var isValid = HelperFunctions.validateTime(value as string, this.state.is24Hour);
             if(isValid == true)
@@ -536,20 +546,22 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
               })
             }
             var militaryTime = HelperFunctions.convertTimeToMilitaryTime(value as string, this.state.timeSeparator);
-            if(isNaN(parseInt(militaryTime[0].toString())) == false && isNaN(parseInt(militaryTime[1].toString()))==false)
-            {
-              this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
-              parseInt(militaryTime[0].toString()), parseInt(militaryTime[1].toString())), value as string);
-            }
-            else
-            {
-              this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
-              stateCurrentDate.getHours(), stateCurrentDate.getMinutes()), value as string);
-            }
+            var validateMilitaryTime = HelperFunctions.validateData(militaryTime);
+              if(validateMilitaryTime == true && isNaN(parseInt(militaryTime[0].toString())) == false && isNaN(parseInt(militaryTime[1].toString()))==false)
+              {
+                this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+                parseInt(militaryTime[0].toString()),parseInt(militaryTime[1].toString())), value as string);
+              }
+              else
+              {
+                this.setDate(new Date(stateCurrentDate.getFullYear(),stateCurrentDate.getMonth(), stateCurrentDate.getDate(), 
+                stateCurrentDate.getHours(), stateCurrentDate.getMinutes()), value as string);
+              }
 
         }
       }
       (event);
+
     }
 
     /**
@@ -581,6 +593,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                           :'Invalid Time Entry. '+timePattern;
       const dateLabel = this.state.userLanguage == 1036 ? "Date actuelle" : "Current Date";
       const dateTimeLabel = this.state.userLanguage == 1036 ? "Date/heure actuelle " : "Current Date/Time"
+      const answer = this.state.selectedTimeText;
         return(
             <div>
                 <Stack horizontal> 
@@ -604,9 +617,11 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         allowFreeform={allowFreeform}
                         buttonIconProps={{iconName:"Clock"}}
                         options = {this.displayHourOptions()}
-                        text = {this.state.selectedTimeText}
+                        //text = {this.state.selectedTimeText != undefined ? this.state.selectedTimeText : ''}
+                        text = {answer}
                         onChange={this._onChange}
                         errorMessage={this.state.errorMessage == true ? errorMessage : undefined}
+                        //defaultSelectedKey ={this.state.is24Hour == true ? '090' : '80am'}
                        />
                       ): null}                       
                     </Stack>

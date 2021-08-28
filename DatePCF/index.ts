@@ -56,20 +56,23 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 
 		let userLanguage = context.userSettings.languageId;
 		let userContext = context;
-		let currDate = moment(context.parameters.CurrentDate.raw as Date);
+		let contextDate = context.parameters.CurrentDate.raw;
+		let currDate = contextDate != null ? moment(contextDate as Date) : moment(new Date());
+		//let currDate = moment(context.parameters.CurrentDate.raw as Date);
 		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
 		let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
 		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate.toDate(),timeSeparator, isMilitaryTime)
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			currentDate: context.parameters.CurrentDate.raw != null ? currDate.toDate() : undefined,
+			//currentDate: contextDate != null ? currDate?.toDate() : undefined,
+			currentDate: currDate.toDate(),
 			userLanguage: userLanguage,
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				this._notifyOutputChanged();
 			},
 			userContext: userContext,
-			selectedTimeText: timeText,
+			selectedTimeText: timeText != null ? timeText : undefined,
 			timeSeparator: timeSeparator,
 			is24Hour: isMilitaryTime,
 			errorMessage: false

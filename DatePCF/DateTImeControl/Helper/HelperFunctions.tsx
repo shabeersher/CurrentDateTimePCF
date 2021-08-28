@@ -126,24 +126,44 @@ export const display24HoursFormatA:IComboBoxOption[] = []
   }
 
  export class HelperFunctions{
-    public static getCurrentTimeFromDateTime = (localDate: Date, timeSeparator: string, is24Hour: boolean) =>{
-        var hour = localDate?.getHours();
-        var time24Hour,timeHour, suffix ='', timeMinute, time12Hour;
-        if(is24Hour == true)
-        {
+    /**
+     * Method is responsible for getting the current time from DateTime
+     * @param localDate 
+     * @param timeSeparator 
+     * @param is24Hour 
+     * @returns 
+     */
+    public static getCurrentTimeFromDateTime = (localDate: Date | null, timeSeparator: string, is24Hour: boolean) =>{
+            if(localDate != null)
+            {
+                var hour = localDate?.getHours();
+                var time24Hour,timeHour, suffix ='', timeMinute, time12Hour;
+                if(is24Hour == true)
+                {
+        
+                    time24Hour = hour < 10 ? '0' + hour : hour;
+                    timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
+                }
+                else
+                {
+                    timeHour = ((hour  + 11) % 12 + 1)
+                    suffix = hour >= 12 ? "PM":"AM";
+                    time12Hour = timeHour < 10 ? '0'+timeHour : timeHour;
+                    timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
+                }          		
+                return is24Hour == true ? time24Hour+timeSeparator+timeMinute : time12Hour+timeSeparator+timeMinute+" "+suffix;
+            }
+            else
+            {
+                return null;
+            }
+        }
 
-            time24Hour = hour < 10 ? '0' + hour : hour;
-            timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
-        }
-        else
-        {
-            timeHour = ((hour  + 11) % 12 + 1)
-            suffix = hour >= 12 ? "PM":"AM";
-            time12Hour = timeHour < 10 ? '0'+timeHour : timeHour;
-            timeMinute = localDate?.getMinutes() as number < 10 ? '0'+localDate?.getMinutes() : localDate?.getMinutes();
-        }          		
-        return is24Hour == true ? time24Hour+timeSeparator+timeMinute : time12Hour+timeSeparator+timeMinute+" "+suffix;
-        }
+       /**
+        * Method is responsible for determining if user time setting is in Military time
+        * @param userContext Context of the user
+        * @returns true if time is in military format
+        */ 
       public static isMilitaryTime = (userContext:ComponentFramework.Context<IInputs>):boolean =>
       {
         var timeFormat = userContext.userSettings.dateFormattingInfo.shortTimePattern;
@@ -168,7 +188,10 @@ export const display24HoursFormatA:IComboBoxOption[] = []
          */
         public static convertTimeToMilitaryTime = (time12h:string, timeSeparator:string) =>{
         let [time, modifier] = time12h.split(' ');
-        modifier = modifier.toUpperCase().trim().toString();
+        if(modifier != null && modifier != undefined)
+        {
+            modifier = modifier.toUpperCase().trim().toString();
+        }
         let [hours, minutes] = time.split(timeSeparator);
       
         if (hours === '12') {
@@ -177,13 +200,34 @@ export const display24HoursFormatA:IComboBoxOption[] = []
         if (modifier === 'PM') {
           hours = parseInt(hours, 10) + 12 +'';
         }
+        
         return [hours, minutes];
       }
 
-      public static validateTime = (time12h:string, is24Hour:boolean) => {
+      /**
+       * 
+       * @param data 
+       * @returns 
+       */
+      public static validateData = (data: string[]) : boolean =>{
+          for(var i=0; i<data.length;i++)
+          {
+              if(data[i] == null || data[i] == undefined)
+                return false;
+          }
+          return true;
+      }
+
+      /**
+       * Method is responsible for validating if a certain time is valid or not
+       * @param time Time that needs to be validated
+       * @param is24Hour true if time is in 24H otherwise false
+       * @returns 
+       */
+      public static validateTime = (time:string, is24Hour:boolean) => {
             if(is24Hour == true)
             {
-                var amPM = time12h.substring(time12h.length - 2).toUpperCase().trim().toString();
+                var amPM = time.substring(time.length - 2).toUpperCase().trim().toString();
                 if((amPM != null) && ((amPM == "AM") || (amPM == "PM")))
                 {
                     return false;
@@ -195,7 +239,7 @@ export const display24HoursFormatA:IComboBoxOption[] = []
             }
             else
             {
-                var amPM = time12h.substring(time12h.lastIndexOf(' ')).toUpperCase().trim().toString();
+                var amPM = time.substring(time.lastIndexOf(' ')).toUpperCase().trim().toString();
                 if((amPM != null) && ((amPM == "AM") || (amPM == "PM")))
                 {
                     return true;
