@@ -16,6 +16,7 @@ export interface IDate {
   is24Hour: boolean;
   timeSeparator: string;
   errorMessage: boolean;
+  isControlDisabled: boolean;
 }
 export interface IDateControlProps extends IDate{
     onDateChanged:(date:IDate) => void;
@@ -159,7 +160,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
             selectedTimeText: props.selectedTimeText,
             is24Hour: props.is24Hour,
             timeSeparator: props.timeSeparator,
-            errorMessage: props.errorMessage
+            errorMessage: props.errorMessage,
+            isControlDisabled: props.isControlDisabled
         };
     }
 
@@ -314,9 +316,11 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         selectedTimeText: this.state.selectedTimeText,
         is24Hour: this.state.is24Hour,
         timeSeparator: this.state.timeSeparator,
-        errorMessage: this.state.errorMessage
+        errorMessage: this.state.errorMessage,
+        isControlDisabled: this.state.isControlDisabled
       };
       this.props.onDateChanged(date);
+
       
     }
 
@@ -325,7 +329,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * Method is responsible for setting the currentDate of the system
      */
     private getCurrentDate = () =>{
-      console.log("GetCuurentDate called");
       var systemDate = new Date()
       var year = systemDate.getFullYear();
       var month = systemDate.getMonth();
@@ -338,16 +341,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
         
         this.setDate(new Date(year, month, day, hour, minute), 
             this.getTimeFromDate(new Date(year, month, day, hour, minute)));
-/*
-            this.setDate(new Date(year, month, day, hour, minute), 
-            "Test Year");
-            */
       }
       
       this.setState({
         errorMessage: false
       }, ()=>{
-        console.log("Error Message in currentDate: "+ this.state.errorMessage)
+        console.log("ErrorMessage State is: "+ this.state.errorMessage)
       } )
       
     }
@@ -399,7 +398,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      */
     private setOnSelectChangeDate(selectedDate:Date)
     {
-      var selectedTimeText = this.state.selectedTimeText;
+      var selectedTimeText = this.state.selectedTimeText != undefined ? this.state.selectedTimeText 
+          : HelperFunctions.getCurrentTimeFromDateTime(selectedDate as Date, this.state.timeSeparator, this.state.is24Hour);
       var is24Hour = this.state.is24Hour;
 
       if(is24Hour == true)
@@ -434,9 +434,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
      * @param value If the time is changed by writing within the text box, value will have that new value
      */
     private _onChange: IComboBoxProps['onChange'] = (event, option, _index, value) => {
-      
-      console.log("OnChange method called");
-      var stateCurrentDate = this.state.currentDate as Date;
+      var stateCurrentDate = this.state.currentDate != undefined ? this.state.currentDate as Date : new Date();
       var is24Hour = this.state.is24Hour;
 
       if(is24Hour == true)
@@ -608,6 +606,8 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             formatDate = {this.dateFormat}
                            onSelectDate = {(selected => this.setOnSelectChangeDate(selected))}
                             value={this.state.currentDate }
+                            disabled = {this.state.isControlDisabled}
+                            
                         />
                     </Stack>
                     <Stack tokens={{childrenGap:10, padding:10}}>
@@ -619,6 +619,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         text = {selectedTimeText}
                         onChange={this._onChange}
                         errorMessage={this.state.errorMessage == true ? errorMessage : undefined}
+                        disabled = {this.state.isControlDisabled}
                        />
                       ): null}                       
                     </Stack>
@@ -627,11 +628,13 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                         <PrimaryButton 
                                 text={dateTimeLabel}
                                 onClick={this.getCurrentDate}
+                                disabled = {this.state.isControlDisabled}
                             />
                       ):
                       <PrimaryButton 
                                 text={dateLabel}
                                 onClick={this.getCurrentDate}
+                                disabled={this.state.isControlDisabled}
                             />}
                     </Stack>
                 </Stack>        
