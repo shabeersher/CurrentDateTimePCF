@@ -69,7 +69,6 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 		let userLanguage = context.userSettings.languageId;
 		let userContext = context;
 		let contextDate = context.parameters.CurrentDate.raw;
-		let isControlDisabled = context.mode.isControlDisabled;
 		let currDate = contextDate != null ? moment(contextDate as Date) : null;
 		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
 		let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
@@ -87,7 +86,6 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 			timeSeparator: timeSeparator,
 			is24Hour: isMilitaryTime,
 			errorMessage: false,
-			isControlDisabled: isControlDisabled
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
