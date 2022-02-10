@@ -4,8 +4,7 @@ import {ComboBox, DatePicker, DayOfWeek, format, IComboBoxOption, IComboBoxProps
   mergeStyleSets, PrimaryButton, Stack, themeRulesStandardCreator} from 'office-ui-fabric-react';
 import { IInputs } from '../generated/ManifestTypes';
 import {HelperFunctions, display12HoursFormatA, display12HoursFormatB, display24HoursFormatA, display24HoursFormatB} from '../DateTimeControl/Helper/HelperFunctions';
-
-
+import './css/DateTimeControl.css';
 export interface IDate {
   currentDate: Date | undefined;
   isDateOnly: boolean;
@@ -570,7 +569,7 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       else if(this.state.is24Hour == false && this.state.timeSeparator === '.')
         return display12HoursFormatB;
       else if(this.state.is24Hour == true && this.state.timeSeparator === ':')
-        return display24HoursFormatA
+        return display24HoursFormatA;
       else if(this.state.is24Hour == true && this.state.timeSeparator === '.')
         return display24HoursFormatB
     }
@@ -592,10 +591,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
       const isControlDisabled = this.state.userContext.mode.isControlDisabled == true ? true : false;
         return(
             <div>
-                <Stack horizontal> 
-                    <Stack tokens={{childrenGap:10, padding:10}}>
+                <Stack className='row' > 
+                    <Stack tokens={{padding:5, maxWidth:300}}>
                         <DatePicker 
-                            className={controlClass.control}
+                            //className={controlClass.control}
+                            //id = "dateControlId"
+                            //className="col-md-4"
                             isRequired={false}
                             allowTextInput={false}
                             ariaLabel={desc}
@@ -608,9 +609,12 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             
                         />
                     </Stack>
-                    <Stack tokens={{childrenGap:10, padding:10}}>
+                    <Stack tokens={{padding:5,maxWidth:300}}>
                       {this.props.isDateOnly == false ? (
                       <ComboBox 
+                        //id="timeControlId"
+                        //className='test'
+                        //className="col-md-4"
                         allowFreeform={allowFreeform}
                         buttonIconProps={{iconName:"Clock"}}
                         options = {this.displayHourOptions()}
@@ -621,15 +625,19 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                        />
                       ): null}                       
                     </Stack>
-                    <Stack tokens={{childrenGap:10, padding:10}}>
+                    <Stack tokens={{padding:5, maxWidth:300}}>
                       {this.props.isDateOnly == false ? (
                         <PrimaryButton 
+                                //id="buttonControlId"
+                                //className="col-md-4"
                                 text={dateTimeLabel}
                                 onClick={this.getCurrentDate}
                                 disabled = {isControlDisabled}
                             />
                       ):
                       <PrimaryButton 
+                                //id="buttonControlId"
+                                //className="col-md-4"
                                 text={dateLabel}
                                 onClick={this.getCurrentDate}
                                 disabled={isControlDisabled}

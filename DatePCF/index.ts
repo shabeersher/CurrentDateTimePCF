@@ -2,7 +2,7 @@ import {IInputs, IOutputs} from "./generated/ManifestTypes";
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import DateControl, {IDateControlProps, IDate} from './DateTimeControl/DateControl'
-import {initializeIcons} from '@fluentui/react/lib/Icons';
+//import {initializeIcons} from '@fluentui/react/lib/Icons';
 import { Context } from "vm";
 import moment = require('moment');
 import { HelperFunctions } from "./DateTimeControl/Helper/HelperFunctions";
@@ -42,7 +42,7 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 	 */
 	public init(context: ComponentFramework.Context<IInputs>, notifyOutputChanged: () => void, state: ComponentFramework.Dictionary, container:HTMLDivElement)
 	{
-		initializeIcons();
+		//initializeIcons();
 		this.container = container;
 		this._notifyOutputChanged = notifyOutputChanged;
 		this.renderControl(context);
@@ -56,8 +56,33 @@ export class CurrentDatePCF implements ComponentFramework.StandardControl<IInput
 	 */
 	public updateView(context: ComponentFramework.Context<IInputs>): void
 	{
-		this.renderControl(context);
+		
+		//this.renderControl(context);
 		// Add code to update control view
+
+		let userLanguage = context.userSettings.languageId;
+		let userContext = context;
+		let contextDate = context.parameters.CurrentDate.raw;
+		let currDate = contextDate != null ? moment(contextDate as Date) : null;
+		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
+		let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate?.toDate() as Date,timeSeparator, isMilitaryTime)
+		const compositeDateControlProps: IDateControlProps = {
+			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
+			currentDate: currDate?.toDate(),
+			userLanguage: userLanguage,
+			onDateChanged:(d:IDate) => {
+				this.currentDate = d;
+				this._notifyOutputChanged();
+			},
+			userContext: userContext,
+			selectedTimeText: timeText != null ? timeText : undefined,
+			timeSeparator: timeSeparator,
+			is24Hour: isMilitaryTime,
+			errorMessage: false,
+		};
+
+		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
 	}
 	  /*
 	   * Method is responsible for rendering the PCF
