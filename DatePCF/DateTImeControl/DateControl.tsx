@@ -203,7 +203,6 @@ export default class DateControl extends React.Component<IDateControlProps, IDat
                             />
                     </Stack>
                 </Stack>
-                
             </div>
         )
     }
