@@ -1,18 +1,32 @@
 import {IInputs, IOutputs} from "./generated/ManifestTypes";
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import DateControl, {IDateControlProps, IDate} from './DateTImeControl/DateControl'
-import {initializeIcons} from '@fluentui/react/lib/Icons';
+import DateControl, {IDateControlProps, IDate} from './DateTimeControl/DateControl'
+//import {initializeIcons} from '@fluentui/react/lib/Icons';
 import { Context } from "vm";
 import moment = require('moment');
+import { HelperFunctions } from "./DateTimeControl/Helper/HelperFunctions";
+import { unregisterIcons } from "office-ui-fabric-react";
 
-export class CurrentDateTimePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
+export class CurrentDatePCF implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
 	private container: HTMLDivElement;
 	private context: Context;
 	private currentDate: IDate;
 	private notifyOutputChanged: () => void;
 	private _notifyOutputChanged: () => void;
+
+
+	//private userLanguage, userContext
+	/*
+	let userContext = context;
+	let contextDate = context.parameters.CurrentDate.raw;
+	let isControlDisabled = context.mode.isControlDisabled;
+	let currDate = contextDate != null ? moment(contextDate as Date) : null;
+	let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
+	let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+	let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate?.toDate() as Date,timeSeparator, isMilitaryTime)
+	*/
 	constructor()
 	{
 
@@ -28,7 +42,7 @@ export class CurrentDateTimePCF implements ComponentFramework.StandardControl<II
 	 */
 	public init(context: ComponentFramework.Context<IInputs>, notifyOutputChanged: () => void, state: ComponentFramework.Dictionary, container:HTMLDivElement)
 	{
-		initializeIcons();
+		//initializeIcons();
 		this.container = container;
 		this._notifyOutputChanged = notifyOutputChanged;
 		this.renderControl(context);
@@ -42,47 +56,61 @@ export class CurrentDateTimePCF implements ComponentFramework.StandardControl<II
 	 */
 	public updateView(context: ComponentFramework.Context<IInputs>): void
 	{
-		this.renderControl(context);
+		
+		//this.renderControl(context);
 		// Add code to update control view
-	}
-	
-	private convertDate(value:Date)
-	{
-		const offsetMinutes = this.context.userSettings.getTimeZoneOffsetMinutes(value);
-		const localDate = this.addMinutes(value, offsetMinutes);
-		return this.getUtcDate(localDate);
-	}
-
-	private getUtcDate(localDate: Date) {
-		return  new  Date(
-			localDate.getUTCFullYear(),
-			localDate.getUTCMonth(),
-			localDate.getUTCDate(),
-			localDate.getUTCHours(),
-			localDate.getUTCMinutes(),
-		);
-	}
-
-	addMinutes(date: Date, minutes: number): Date {
-		return new Date(date.getTime() + minutes * 60000);
-	}
-
-	private renderControl(context:ComponentFramework.Context<IInputs>):void{
-		this.context = context;
 
 		let userLanguage = context.userSettings.languageId;
-		let currDate = moment(context.parameters.CurrentDate.raw as Date);
-		var utcCurrDate = this.getUtcDate(currDate.toDate());
-		var convertedUTCDate = this.convertDate(utcCurrDate);
-
+		let userContext = context;
+		let contextDate = context.parameters.CurrentDate.raw;
+		let currDate = contextDate != null ? moment(contextDate as Date) : null;
+		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
+		let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate?.toDate() as Date,timeSeparator, isMilitaryTime)
 		const compositeDateControlProps: IDateControlProps = {
 			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
-			currentDate: context.parameters.CurrentDate.raw != null ? convertedUTCDate : undefined,
+			currentDate: currDate?.toDate(),
 			userLanguage: userLanguage,
 			onDateChanged:(d:IDate) => {
 				this.currentDate = d;
 				this._notifyOutputChanged();
-			}
+			},
+			userContext: userContext,
+			selectedTimeText: timeText != null ? timeText : undefined,
+			timeSeparator: timeSeparator,
+			is24Hour: isMilitaryTime,
+			errorMessage: false,
+		};
+
+		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
+	}
+	  /*
+	   * Method is responsible for rendering the PCF
+	   * @param context context of the user
+	   */
+	private renderControl(context:ComponentFramework.Context<IInputs>):void{
+		this.context = context;
+
+		let userLanguage = context.userSettings.languageId;
+		let userContext = context;
+		let contextDate = context.parameters.CurrentDate.raw;
+		let currDate = contextDate != null ? moment(contextDate as Date) : null;
+		let isMilitaryTime = HelperFunctions.isMilitaryTime(userContext);
+		let timeSeparator = userContext.userSettings.dateFormattingInfo.timeSeparator;
+		let timeText = HelperFunctions.getCurrentTimeFromDateTime(currDate?.toDate() as Date,timeSeparator, isMilitaryTime)
+		const compositeDateControlProps: IDateControlProps = {
+			isDateOnly: context.parameters.CurrentDate.type === "DateAndTime.DateOnly" ? true : false,
+			currentDate: currDate?.toDate(),
+			userLanguage: userLanguage,
+			onDateChanged:(d:IDate) => {
+				this.currentDate = d;
+				this._notifyOutputChanged();
+			},
+			userContext: userContext,
+			selectedTimeText: timeText != null ? timeText : undefined,
+			timeSeparator: timeSeparator,
+			is24Hour: isMilitaryTime,
+			errorMessage: false,
 		};
 
 		ReactDOM.render(React.createElement(DateControl, compositeDateControlProps), this.container);
