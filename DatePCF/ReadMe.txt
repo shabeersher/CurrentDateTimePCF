@@ -1,3 +1,9 @@
+Importing PCF solution into your CRM
+1- Before importing the solution into your CRM environment, you much change the attachments file settings within your CRM from 5000KB to 32000KB
+2- Navigate to System settings and change that under the Email tab.
+3- After that, continue normally with the PCF import
+
+
 Instructions to execute the PCF code
 
 1- Download the entire repository from the github
@@ -30,8 +36,3 @@ Updating PCF
 1- Change the version number of the PCF in the ControlManifest file
 2- Rebuild the project
 3- Deploy the project to CRM
-
-Importing PCF solution into your CRM
-1- Before importing the solution into your CRM environment, you much change the attachments file settings within your CRM from 5000KB to 32000KB
-2- Navigate to System settings and change that under the Email tab.
-3- After that, continue normally with the PCF import
